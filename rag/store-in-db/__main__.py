@@ -11,37 +11,21 @@ supabase = create_client(supabase_url=SUPABASE_URL, supabase_key=SUPABASE_KEY)
 
 
 def main():
-    print("Inserting document's parents...")
-    with open("./data/output/parents.json") as parents_file:
-        parents = json.load(fp=parents_file)
-        records = [
-            {
-                "id": parent["id"],
-                "section_title": parent["sectionTitle"],
-                "content": parent["content"],
-            }
-            for parent in parents
-        ]
-
-    supabase.table("document_parents").delete().gte("id", 0).execute()
-    supabase.table("document_parents").insert(records).execute()
-
     print("Inserting documents...")
-    with open("./data/output/children.json") as document_file:
-        documents = json.load(fp=document_file)
+    with open("./data/output/chunks.json") as chunks_file:
+        chunks = json.load(fp=chunks_file)
         records = [
             {
-                "id": document["id"],
-                "parent_id": document["parentId"],
-                "section_title": document["sectionTitle"],
-                "content": document["content"],
-                "embedding": document["embedding"],
+                "id": chunk["id"],
+                "section_title": chunk["sectionTitle"],
+                "content": chunk["content"],
+                "embedding": chunk["embedding"],
             }
-            for document in documents
+            for chunk in chunks
         ]
 
-    supabase.table("documents").delete().gte("id", 0).execute()
-    supabase.table("documents").insert(records).execute()
+    supabase.table("chunks").delete().gte("id", 0).execute()
+    supabase.table("chunks").insert(records).execute()
 
     print("\nProcess completed.")
 

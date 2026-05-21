@@ -40,22 +40,19 @@ def parse_sections(lines):
 
 
 def chunk_content(parsed_section, file):
-    children_chunks = []
-    parent_chunks = []
+    chunks = []
 
-    child_count = 0
-    parent_count = 0
+    count = 0
     for block in parsed_section:
-        children = []
 
         title = block["title"]
         id = slugify(block["title"])
         section: list[str] = block["body"]
 
         for paragraph in section:
-            parent_chunks.append(
+            chunks.append(
                 {
-                    "id": parent_count,
+                    "id": count,
                     "sectionTitle": title,
                     "content": paragraph,
                     "sourceFile": file,
@@ -63,35 +60,17 @@ def chunk_content(parsed_section, file):
                 }
             )
 
-            lines = paragraph.split(".")
-            cleaned_lines = [line.strip() + "." for line in lines if len(line.strip())]
+            count += 1
 
-            for line in cleaned_lines:
-                child = {
-                    "id": child_count,
-                    "parentId": parent_count,
-                    "sectionTitle": title,
-                    "content": line,
-                    "sourceFile": file,
-                    "estimateTokens": len(line) // 4,
-                }
-                children.append(child)
-
-                child_count += 1
-
-            parent_count += 1
-
-        children_chunks.extend(children)
-
-    return children_chunks, parent_chunks
+    return chunks
 
 
 def main(file="./data/input/data.txt"):
     with open(file) as data_file:
         lines = data_file.readlines()
         parsed_section = parse_sections(lines)
-        children_chunks, parent_chunks = chunk_content(parsed_section, file)
-        return children_chunks, parent_chunks
+        chunks = chunk_content(parsed_section, file)
+        return chunks
 
 
 main()
