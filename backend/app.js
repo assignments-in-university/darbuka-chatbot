@@ -8,6 +8,9 @@ import chatbotRouter from "./routes/chatbot.js";
 const app = express();
 app.use(json());
 
+// ROUTES
+app.use("/chatbot", chatbotRouter);
+
 // API RATE LIMITER
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000,
@@ -17,8 +20,6 @@ const limiter = rateLimit({
   ipv6Subnet: 56,
 });
 app.use(limiter);
-
-app.use("/", chatbotRouter);
 
 // LISTEN TO PORT
 const port = process.env.PORT || 3000;
