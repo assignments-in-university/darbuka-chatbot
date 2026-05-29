@@ -39,7 +39,7 @@ def main():
             "match_documents",
             {
                 "query_embedding": embedding_obj.values,
-                "match_threshold": 0.70,
+                "match_threshold": 0.65,
                 "match_count": 3,
             },
         ).execute()
