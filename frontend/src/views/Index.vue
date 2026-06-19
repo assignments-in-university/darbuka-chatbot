@@ -1,3 +1,137 @@
-<script lang="ts"></script>
+<script setup lang="ts">
+import { ref } from 'vue';
 
-<template>testing</template>
+const userMessage = ref('');
+const selectedCategory = ref<string | null>(null);
+
+const categories = [
+  {
+    id: 'rhythm',
+    title: 'Explore rhythm & beats',
+    description: 'Learn about maqam scales, time signatures, and Middle Eastern percussion traditions.',
+    icon: '♫',
+    tag: 'Music Theory',
+  },
+  {
+    id: 'culture',
+    title: 'Cultural Heritage',
+    description: 'Discover stories, history, and context behind the darbuka and its music across cultures',
+    icon: '🎼',
+    tag: 'Culture',
+  },
+  {
+    id: 'learning',
+    title: 'Learning resources',
+    description: 'Get curated lessons, technique breakdowns, and practice routines for all skill levels.',
+    icon: '📚',
+    tag: 'Education',
+  },
+  {
+    id: 'practice',
+    title: 'Practice with me',
+    description: 'Work through exercises, get feedback, and build your rhythmic vocabulary step by step',
+    icon: '🎙️',
+    tag: 'Practice',
+  },
+];
+
+const quickActions = [
+  'What is darbuka?',
+  'Teach me a rhythm',
+  'History of the goblet drum',
+  'Maqam scales explained',
+  'Play a pattern',
+];
+
+const handleCategoryClick = (categoryId: string) => {
+  selectedCategory.value = categoryId;
+};
+
+const handleQuickAction = (action: string) => {
+  userMessage.value = action;
+};
+
+const handleSendMessage = () => {
+  if (userMessage.value.trim()) {
+    console.log('Sending:', userMessage.value);
+    userMessage.value = '';
+  }
+};
+</script>
+
+<template>
+  <div class="flex flex-col h-screen bg-[#f5ede3] px-5 py-10">
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto flex flex-col items-center">
+      <div class="text-center mb-8">
+        <h1 class="text-[28px] font-bold text-black m-0 mb-3 tracking-[-0.5px]">What would would you like to explore today?</h1>
+        <p class="text-xs text-[#999999] max-w-150 leading-[1.6] m-0">
+          Ask me anything about music, rhythm, or culture - I'm here to help you connect with deep tradition of the darbuka.
+        </p>
+      </div>
+
+      <!-- Category Cards Grid -->
+      <div class="grid grid-cols-2 gap-6 max-w-225 w-full mb-8 max-[768px]:grid-cols-1">
+        <div
+          v-for="category in categories"
+          :key="category.id"
+          class="bg-[#efe5d8] border-2 border-[#d4c4b0] rounded-2xl p-6 cursor-pointer transition-all duration-300 flex flex-col hover:border-[#c97d4a] hover:bg-[#e8dcc8]"
+          :class="{ 'border-[#c97d4a] bg-[#e8dcc8]': selectedCategory === category.id }"
+          @click="handleCategoryClick(category.id)"
+        >
+          <div class="text-[28px] mb-4 bg-[#c97d4a] w-12 h-12 rounded-lg flex items-center justify-center">
+            {{ category.icon }}
+          </div>
+          <h3 class="text-[15px] font-semibold text-[#333333] m-0 mb-2 flex items-center gap-1">
+            {{ category.title }} <span class="text-lg text-[#999999]">›</span>
+          </h3>
+          <p class="text-xs text-[#888888] m-0 mb-3 leading-normal flex-1">
+            {{ category.description }}
+          </p>
+          <div class="inline-block bg-[#d99a4a] text-white px-3.5 py-1.5 rounded-[20px] text-[11px] font-semibold w-fit">
+            {{ category.tag }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex flex-wrap gap-3 justify-center max-w-175 mb-8 max-[768px]:flex-col">
+        <button
+          v-for="(action, index) in quickActions"
+          :key="index"
+          class="bg-white border border-[#d4c4b0] rounded-[20px] px-4 py-2 text-xs text-[#888888] cursor-pointer transition-all duration-200 whitespace-nowrap hover:border-[#c97d4a] hover:text-[#c97d4a] max-[768px]:w-full"
+          :class="action === 'Play a pattern' ? 'bg-[#d99a4a] text-white border-[#d99a4a] hover:bg-[#c97d4a]' : ''"
+          @click="handleQuickAction(action)"
+        >
+          {{ action }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="w-full `max-w-125` mx-auto">
+      <div class="flex items-center gap-2.5 bg-[#e8dcc8] rounded-[20px] px-3 py-2 shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
+        <textarea
+          v-model="userMessage"
+          rows="1"
+          class="flex-1 border-none outline-none bg-transparent text-[13px] text-[#888888] px-2 py-0 resize-none leading-[1.4] `max-h-30` overflow-y-auto placeholder:text-[#cccccc] self-center"
+          placeholder="Ask me anything about music, rhythm, or culture..."
+          
+          @input="
+            (e) => {
+              const el = (e.target as HTMLTextAreaElement);
+              el.style.height = 'auto';
+              el.style.height = el.scrollHeight + 'px';
+            }
+          "
+        ></textarea>
+        <button
+          class="bg-transparent border-none cursor-pointer text-base px-2 py-1.5 transition-transform duration-200 hover:scale-110 shrink-0"
+          @click="handleSendMessage"
+        >
+          ✈️
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
