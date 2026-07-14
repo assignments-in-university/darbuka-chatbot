@@ -9,7 +9,7 @@ import MessageIcon from '@/assets/icons/Message.vue';
     <!-- TOP -->
     <div class="h-16 flex items-center px-4 gap-x-4 mb-4">
       <div class="aspect-square w-12 rounded-md border-3 border-emerald">
-        <img src="../assets/images/logo.png" alt="Logo" class="rounded-md" />
+        <img src="../assets/images/logo.jpg" alt="Logo" class="rounded-md" />
       </div>
       <div>
         <h1 class="text-lg font-primary uppercase">Sout</h1>
