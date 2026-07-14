@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Header from '@/components/Header.vue';
-import Input from '@/components/Input.vue';
 import Sidebar from '@/components/Sidebar.vue';
 </script>
 
@@ -10,8 +9,9 @@ import Sidebar from '@/components/Sidebar.vue';
     <main class="flex-1">
       <Header></Header>
 
-      <div>Content area goes here</div>
-      <Input></Input>
+      <div class="text-white bg-black h-[calc(100%-64px)] p-4 relative">
+        <RouterView></RouterView>
+      </div>
     </main>
   </div>
 </template>
