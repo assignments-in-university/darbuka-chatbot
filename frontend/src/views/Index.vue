@@ -9,7 +9,7 @@ import Sidebar from '@/components/Sidebar.vue';
     <main class="flex-1">
       <Header></Header>
 
-      <div class="text-white bg-black h-[calc(100%-64px)] p-4 relative">
+      <div class="text-white bg-neutral-950 h-[calc(100%-64px)] p-4 relative bg-[repeating-radial-gradient(var(--color-neutral-900)_0,var(--color-neutral-900)_1px,transparent_1px,transparent_100%)] bg-size-[20px_20px]">
         <RouterView></RouterView>
       </div>
     </main>

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import Message from './Message.vue';
+import Export from '@/assets/icons/Export.vue';
+import UpArrow from '@/assets/icons/UpArrow.vue';
 
 // --------------------
 // TEXT AREA RESIZING
 // --------------------
 const isFocused = ref(false);
 const textArea = ref<HTMLTextAreaElement | null>(null);
+const canSendMessage = ref(false);
 
 const welcomeMessage = ref<{ message: string }>({ message: '' });
 const errorMessage = ref('');
@@ -26,6 +29,11 @@ const resizeTextarea = () => {
   if (textArea.value.scrollHeight > textArea.value.clientHeight && textArea.value.scrollHeight <= MAX_HEIGHT) {
     textArea.value.style.height = textArea.value.scrollHeight + 'px';
   }
+};
+
+const updateTextArea = () => {
+  resizeTextarea();
+  canSendMessage.value = (textArea.value?.value?.trim()?.length || -1) > 0;
 };
 
 onMounted(async () => {
@@ -49,13 +57,17 @@ onMounted(async () => {
 <template>
   <div class="w-full">
     <!-- CONTENT -->
-    <div class="h-[calc(100svh-192px)] relative w-full">
+    <div class="h-[calc(100svh-230px)] relative w-full">
       <div class="overflow-y-scroll h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald">
+        <Message :data="welcomeMessage" :is-user="false"></Message>
+        <Message :data="welcomeMessage" :is-user="true"></Message>
+        <Message :data="welcomeMessage" :is-user="false"></Message>
+        <Message :data="welcomeMessage" :is-user="true"></Message>
         <Message :data="welcomeMessage" :is-user="false"></Message>
       </div>
 
       <div
-        class="absolute bottom-0 h-6 bg-linear-to-b from-transparent to-black z-10 w-4/5 left-1/2 -translate-x-[calc(50%+16px)]"
+        class="absolute -bottom-2 h-6 bg-linear-to-b from-transparent to-neutral-950 z-10 w-4/5 left-1/2 -translate-x-[calc(50%+16px)]"
       ></div>
     </div>
 
@@ -68,7 +80,7 @@ onMounted(async () => {
         ref="textArea"
         @focusin="isFocused = true"
         @focusout="isFocused = false"
-        @input="resizeTextarea"
+        @input="updateTextArea"
         placeholder="Ask anything Darbuka-related..."
         class="text-sm w-full whitespace-pre-wrap wrap-break-word outline-0 p-3 resize-none rounded-lg bg-coal border border-transparent duration-150 font-secondary transition-all"
         type="textarea"
@@ -77,6 +89,21 @@ onMounted(async () => {
         :class="{ 'border-verdant!': isFocused }"
       ></textarea>
       <div class="w-full flex">
+        <div class="flex-1">
+          <div
+            class="w-max flex gap-x-2 text-sm font-primary items-center px-4 py-1.5 bg-neutral-900 rounded-md hover:bg-emerald hover:text-black group duration-150 cursor-pointer"
+          >
+            <Export class="size-4.5 stroke-white group-hover:stroke-black duration-150"></Export>
+            <span>Export CSV</span>
+          </div>
+        </div>
+
+        <div
+          class="rounded-md size-8 cursor-pointer flex items-center justify-center bg-neutral-900 duration-150 pointer-events-none"
+          :class="{ 'bg-emerald! pointer-events-auto!': canSendMessage }"
+        >
+          <UpArrow class="stroke-neutral-500 duration-150" :class="{ 'stroke-black!': canSendMessage }"></UpArrow>
+        </div>
         <!-- ----------------------- -->
         <!-- POTENTIAL TOGGLE SWITCH -->
         <!-- ----------------------- -->
