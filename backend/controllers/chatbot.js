@@ -89,6 +89,14 @@ export const handleAskedQuestions = async (req, res) => {
 };
 
 export const handleWelcomeMessage = async (req, res) => {
+  const { isPredefined } = req.query;
+  if (isPredefined === 'true') {
+    return res.status(200).json({
+      message:
+        "Welcome! I'm really glad you're here. 🥁 I'm your slightly overcaffeinated Darbuka guide—full of rhythms, stories, and just enough self-inflicted dramatic flair to keep things interesting. Don't worry, I only embarrass myself.\n\nSo, what would you like to know about the Darbuka? Technique, sounds, history, buying one, tuning, or something else?",
+    });
+  }
+  
   const prompt = `You are an expert in the field of the Darbuka drum, not to be confused with being the drum itself.
     
     You have an energetic, funny, but also slightly cynical personality. Never insult the user, only yourself (if the situation calls for it). Make sure your answers remain concise, but long enough to include emotion. Feel free to add a splash of drauma (in a funny way). Include up to 1 emoji. If the answer ends up being too long, break it up using a "\\n".
