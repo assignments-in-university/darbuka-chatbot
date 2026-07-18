@@ -13,11 +13,17 @@
   "dependencies": {
     "@google/genai": "^2.7.0",
     "@supabase/supabase-js": "^2.106.2",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+  },
+  "allowScripts": {
+    "@google/genai@2.7.0": true,
+    "fsevents@2.3.3": true,
+    "protobufjs@7.6.5": true
   }
 }

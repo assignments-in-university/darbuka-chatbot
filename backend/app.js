@@ -1,11 +1,16 @@
 import "dotenv/config";
 import express, { json } from "express";
+import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import { supabase } from "./utils/db.js";
-
 import chatbotRouter from "./routes/chatbot.js";
 
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
 app.use(json());
 
 // ROUTES
