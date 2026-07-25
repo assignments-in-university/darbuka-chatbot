@@ -46,7 +46,6 @@ const getAiResponse = async (prompt) => {
 
 export const handleAskedQuestions = async (req, res) => {
   const { message } = req.body;
-  console.log(message);
   const { isPredefined } = req.query;
 
   if (isPredefined === "true") {
