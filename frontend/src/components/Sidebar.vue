@@ -28,7 +28,7 @@ import MessageIcon from '@/assets/icons/Message.vue';
     <!-- ALL CHATS -->
     <h2 class="px-4 font-tertiary text-sm mt-6 mb-2">All Chats</h2>
     <div class="h-90 relative mb-auto">
-      <div class="px-4 flex flex-col gap-y-2 h-84 overflow-y-scroll">
+      <div class="px-4 flex flex-col gap-y-2 max-h-84 overflow-y-auto scrollbar-thumb-emerald!">
         <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
           <span class="font-primary text-neutral-300 group-hover:text-white duration-100">recent chat 1</span>
         </div>

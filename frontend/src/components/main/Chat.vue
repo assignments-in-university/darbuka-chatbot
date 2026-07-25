@@ -58,7 +58,7 @@ onMounted(async () => {
   <div class="w-full">
     <!-- CONTENT -->
     <div class="h-[calc(100svh-230px)] relative w-full">
-      <div class="overflow-y-scroll h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald">
+      <div class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald">
         <Message :data="welcomeMessage" :is-user="false"></Message>
         <Message :data="welcomeMessage" :is-user="true"></Message>
         <Message :data="welcomeMessage" :is-user="false"></Message>
