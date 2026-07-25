@@ -1,18 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import Message from './Message.vue';
 import Export from '@/assets/icons/Export.vue';
 import UpArrow from '@/assets/icons/UpArrow.vue';
+import { Chat } from '@/utils/Chat.js';
+import { useRouter } from 'vue-router';
 
-// --------------------
+// VUE
+const router = useRouter();
+
+// CHAT
+const contentArea = ref<HTMLElement | null>(null);
+const chat = ref<Chat | null>(null);
+const message = ref('');
+const errorMessage = ref('');
+const awaitingResponse = ref(false);
+
 // TEXT AREA RESIZING
-// --------------------
 const isFocused = ref(false);
 const textArea = ref<HTMLTextAreaElement | null>(null);
 const canSendMessage = ref(false);
-
-const welcomeMessage = ref<{ message: string }>({ message: '' });
-const errorMessage = ref('');
 
 const resizeTextarea = () => {
   if (!textArea.value) return;
@@ -36,7 +43,82 @@ const updateTextArea = () => {
   canSendMessage.value = (textArea.value?.value?.trim()?.length || -1) > 0;
 };
 
+const sendMessage = async (e: KeyboardEvent) => {
+  if (e.shiftKey || !chat.value || !contentArea.value) return;
+  e.preventDefault();
+
+  // Write user message
+  chat.value.newMessage({
+    text: message.value,
+    isUser: true,
+  });
+
+  // Update awaiting response
+  awaitingResponse.value = true;
+
+  // Wait until tick is completed to load new message before scrolling down
+  await nextTick();
+  contentArea.value.scrollTo({ top: contentArea.value.scrollHeight });
+
+  // Empty textarea and resize it
+  const msgCopy = message.value.slice();
+  message.value = '';
+  updateTextArea();
+
+  // Begin fetching response
+  try {
+    const res = await fetch('http://localhost:3000/chatbot/ask?isPredefined=true', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+
+      body: JSON.stringify({
+        message: msgCopy,
+      }),
+    });
+
+    const jsonRes = await res.json();
+    if (!jsonRes || !jsonRes?.message || !jsonRes.message.length) {
+      throw Error('Could not parse json response from server.');
+    }
+
+    // Write down reply
+    chat.value.newMessage({
+      text: jsonRes.message as string,
+      isUser: false,
+    });
+
+    // await nextTick();
+    // contentArea.value.scrollTo({ top: contentArea.value.scrollHeight });
+  } catch (e) {
+    console.log(e);
+    errorMessage.value = 'An error occurred, please refresh and try again.';
+  } finally {
+    awaitingResponse.value = false;
+  }
+};
+
 onMounted(async () => {
+  const { id } = router.currentRoute.value.params;
+  const isNewChat = !(id && !Array.isArray(id));
+
+  try {
+    if (isNewChat) {
+      chat.value = new Chat({ name: 'New Chat' });
+    } else {
+      chat.value = new Chat({ id });
+    }
+  } catch (e) {
+    console.log(e);
+    errorMessage.value = 'Could not initialize chat from memory. Please try a different chat or make a new one.';
+    return;
+  }
+
+  // Only continue to load welcome message if this is a new chat
+  if (!isNewChat) return;
+
+  // Load welcome message
   try {
     const res = await fetch('http://localhost:3000/chatbot/welcome?isPredefined=true', { method: 'GET' });
     const json = await res.json();
@@ -46,7 +128,11 @@ onMounted(async () => {
       throw Error('Empty welcome message.');
     }
 
-    welcomeMessage.value = json;
+    chat.value.newMessage({
+      text: json?.message as string,
+      isUser: false,
+      noSave: true,
+    });
   } catch (e) {
     console.log(e);
     errorMessage.value = 'An error occurred, please refresh and try again.';
@@ -58,12 +144,19 @@ onMounted(async () => {
   <div class="w-full">
     <!-- CONTENT -->
     <div class="h-[calc(100svh-230px)] relative w-full">
-      <div class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald">
-        <Message :data="welcomeMessage" :is-user="false"></Message>
-        <Message :data="welcomeMessage" :is-user="true"></Message>
-        <Message :data="welcomeMessage" :is-user="false"></Message>
-        <Message :data="welcomeMessage" :is-user="true"></Message>
-        <Message :data="welcomeMessage" :is-user="false"></Message>
+      <div
+        class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald"
+        ref="contentArea"
+      >
+        <Message
+          v-if="!errorMessage && chat?.getMessages().length === 0"
+          :data="{ message: 'loading...' }"
+          :is-user="false"
+          :is-skeleton="true"
+        ></Message>
+        <Message :data="message" :is-user="message.isUser" v-for="message in chat?.getMessages()"></Message>
+        <Message v-if="awaitingResponse" :data="{ message: 'loading...' }" :is-user="false" :is-skeleton="true"></Message>
+        <Message v-if="errorMessage" :data="{ message: errorMessage }" :is-user="false" :is-error="true"></Message>
       </div>
 
       <div
@@ -81,12 +174,14 @@ onMounted(async () => {
         @focusin="isFocused = true"
         @focusout="isFocused = false"
         @input="updateTextArea"
+        v-model="message"
         placeholder="Ask anything Darbuka-related..."
         class="text-sm w-full whitespace-pre-wrap wrap-break-word outline-0 p-3 resize-none rounded-lg bg-coal border border-transparent duration-150 font-secondary transition-all"
         type="textarea"
         wrap="soft"
         rows="1"
         :class="{ 'border-verdant!': isFocused }"
+        @keydown.enter="sendMessage"
       ></textarea>
       <div class="w-full flex">
         <div class="flex-1">

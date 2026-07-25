@@ -6,15 +6,11 @@ const router = createRouter({
     {
       path: '/',
       component: () => import('../views/Index.vue'),
-      redirect: '/chat/new',
+      redirect: '/chat',
       children: [
-        // DEFAULT ROUTE FOR NEW CHATS
+        // NEW CHAT
         {
           path: '/chat',
-          redirect: '/chat/new',
-        },
-        {
-          path: '/chat/new',
           component: () => import('../components/main/Chat.vue'),
         },
         // EXISTING CHATS
