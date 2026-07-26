@@ -73,20 +73,29 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
           </span>
           <span class="font-tertiary text-xs text-neutral-500">{{ dateFormatter.format(chat.getChatCreatedAt()) }}</span>
         </div>
+        <div class="font-tertiary text-sm px-2 py-2 bg-neutral-900 rounded-md" v-if="chats.length === 0">
+          No chats to display. Try starting one first?
+        </div>
       </div>
       <div class="absolute bottom-6 w-72 h-6 bg-linear-to-b from-transparent to-coal z-100"></div>
     </div>
 
     <!-- HELP AND SETTINGS -->
     <div class="px-4 space-y-2">
-      <div class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group">
+      <RouterLink
+        to="/help"
+        class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group"
+      >
         <Help class="size-6 p-0.5 fill-neutral-300 group-hover:fill-white duration-100"></Help>
         <span class="font-primary text-neutral-300 group-hover:text-white duration-100 uppercase">Help</span>
-      </div>
-      <div class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group">
+      </RouterLink>
+      <RouterLink
+        to="/settings"
+        class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group"
+      >
         <Gear class="size-6 stroke-1 stroke-neutral-300 group-hover:stroke-white duration-100"></Gear>
         <span class="font-primary text-neutral-300 group-hover:text-white duration-100 uppercase">Settings</span>
-      </div>
+      </RouterLink>
     </div>
 
     <!-- PROFILE -->

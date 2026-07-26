@@ -54,8 +54,8 @@ watch(chatName, (newName) => {
     </div>
 
     <div class="flex items-center gap-x-4">
-      <Gear class="stroke-neutral-400 size-6"></Gear>
-      <Help class="fill-neutral-400 size-5"></Help>
+      <Gear class="stroke-neutral-400 size-6 cursor-pointer" @click="$router.push('/settings')"></Gear>
+      <Help class="fill-neutral-400 size-5 cursor-pointer" @click="$router.push('/help')"></Help>
     </div>
   </header>
 </template>

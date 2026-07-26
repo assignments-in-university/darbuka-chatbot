@@ -18,6 +18,14 @@ const router = createRouter({
           path: '/chat/:id',
           component: () => import('../components/main/Chat.vue'),
         },
+        {
+          path: '/help',
+          component: () => import('../components/main/Help.vue'),
+        },
+        {
+          path: '/settings',
+          component: () => import('../components/main/Settings.vue'),
+        },
       ],
     },
   ],

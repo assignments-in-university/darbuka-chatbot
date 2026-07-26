@@ -14,3 +14,7 @@
 body {
   @apply bg-white dark:bg-black;
 }
+
+.router-link-active {
+  @apply bg-neutral-900;
+}
