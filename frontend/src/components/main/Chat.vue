@@ -7,6 +7,7 @@ import { Chat } from '@/utils/Chat.js';
 import { useRouter } from 'vue-router';
 import { chatName, resetChatName, setChatId, updateChatName } from '@/stores/useChatStore.js';
 import { ChatList } from '@/utils/ChatList.js';
+import { AnimatePresence, motion } from 'motion-v';
 
 const props = defineProps<{
   chatList: ChatList;
@@ -44,14 +45,21 @@ const resizeTextarea = () => {
   }
 };
 
-const updateTextArea = () => {
-  resizeTextarea();
-  canSendMessage.value = (textArea.value?.value?.trim()?.length || -1) > 0;
+const updateMessageSendingStatus = () => {
+  canSendMessage.value = (message.value.length || -1) > 0;
 };
 
-const sendMessage = async (e: KeyboardEvent) => {
-  if (e.shiftKey || !chat.value || !contentArea.value) return;
-  e.preventDefault();
+const updateTextArea = () => {
+  resizeTextarea();
+  updateMessageSendingStatus();
+};
+
+const sendMessage = async (e: KeyboardEvent | null) => {
+  if (!chat.value || !contentArea.value) return;
+  if (e) {
+    if (e.shiftKey) return;
+    e.preventDefault();
+  }
 
   // Update chat name if needed
   if (chat.value.getChatName() !== chatName.value) {
@@ -169,6 +177,15 @@ const loadChat = async () => {
 
 watch(() => router.currentRoute.value.params.id, loadChat);
 
+const predefinedMessages = ['How old is the darbuka?', 'Who invented the drum?', 'Is it easy to play it?'];
+
+const updateChatWithPredefinedMessage = (idx: number) => {
+  message.value = predefinedMessages[idx] || '';
+  updateTextArea();
+
+  textArea.value?.focus();
+};
+
 onMounted(async () => {
   await loadChat();
 });
@@ -194,6 +211,24 @@ onMounted(async () => {
         class="absolute -bottom-2 h-6 bg-linear-to-b from-transparent to-neutral-950 z-10 w-4/5 left-1/2 -translate-x-[calc(50%+16px)]"
       ></div>
     </div>
+
+    <AnimatePresence>
+      <motion.div
+        class="p-2 w-[calc(80%-25px)] flex items-center justify-center flex-wrap absolute left-1/2 -translate-x-1/2 gap-2 z-100"
+        v-if="chat?.getMessages().length === 1 && message.length === 0"
+        :initial="{ bottom: 80 }"
+        :animate="{ bottom: 144 }"
+        :exit="{ bottom: 80 }"
+      >
+        <div
+          v-for="(msg, idx) in predefinedMessages"
+          class="text-neutral-400 text-sm px-4 py-1.5 bg-neutral-900 rounded-md hover:bg-emerald hover:text-black group duration-150 cursor-pointer"
+          @click="updateChatWithPredefinedMessage(idx)"
+        >
+          {{ msg }}
+        </div>
+      </motion.div>
+    </AnimatePresence>
 
     <!-- INPUT -->
     <div
@@ -227,34 +262,10 @@ onMounted(async () => {
         <div
           class="rounded-md size-8 cursor-pointer flex items-center justify-center bg-neutral-900 duration-150 pointer-events-none"
           :class="{ 'bg-emerald! pointer-events-auto!': canSendMessage }"
+          @click="sendMessage(null)"
         >
           <UpArrow class="stroke-neutral-500 duration-150" :class="{ 'stroke-black!': canSendMessage }"></UpArrow>
         </div>
-        <!-- ----------------------- -->
-        <!-- POTENTIAL TOGGLE SWITCH -->
-        <!-- ----------------------- -->
-        <!-- <div class="flex text-sm relative rounded-md overflow-hidden font-tertiary bg-coal">
-        <div
-          class="py-1 px-2 w-36 z-10 duration-300 cursor-pointer flex items-center justify-center"
-          :class="{ 'text-coal': activeMode === 'text' }"
-          @click="activeMode = 'text'"
-        >
-          <Text :class="{ 'stroke-coal': activeMode === 'text' }"></Text>
-          <span>Text Mode</span>
-        </div>
-        <div
-          class="py-1 px-2 w-36 z-10 duration-300 cursor-pointer flex items-center justify-center gap-x-1"
-          :class="{ 'text-coal': activeMode === 'drum' }"
-          @click="activeMode = 'drum'"
-        >
-          <Drum class="size-5" :class="{ 'stroke-coal': activeMode === 'drum' }"></Drum>
-          <span> Drum Mode </span>
-        </div>
-        <div
-          class="bg-verdant w-36 absolute h-full duration-300 left-0"
-          :style="activeMode === 'drum' ? 'left: 144px' : ''"
-        ></div>
-      </div> -->
       </div>
     </div>
   </div>
