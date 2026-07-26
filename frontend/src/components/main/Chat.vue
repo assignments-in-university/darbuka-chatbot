@@ -5,7 +5,12 @@ import Export from '@/assets/icons/Export.vue';
 import UpArrow from '@/assets/icons/UpArrow.vue';
 import { Chat } from '@/utils/Chat.js';
 import { useRouter } from 'vue-router';
-import { chatName } from '@/stores/useChatStore.js';
+import { chatName, resetChatName, setChatId, updateChatName } from '@/stores/useChatStore.js';
+import { ChatList } from '@/utils/ChatList.js';
+
+const props = defineProps<{
+  chatList: ChatList;
+}>();
 
 // VUE
 const router = useRouter();
@@ -48,6 +53,14 @@ const sendMessage = async (e: KeyboardEvent) => {
   if (e.shiftKey || !chat.value || !contentArea.value) return;
   e.preventDefault();
 
+  // Update chat name if needed
+  if (chat.value.getChatName() !== chatName.value) {
+    chat.value.updateChatName({ name: chatName.value });
+  }
+
+  // Add the chat to the chat list
+  props.chatList.addChat(chat.value.getChatId());
+
   // Write user message
   chat.value.newMessage({
     text: message.value,
@@ -89,15 +102,15 @@ const sendMessage = async (e: KeyboardEvent) => {
       text: jsonRes.message as string,
       isUser: false,
     });
-
-    // await nextTick();
-    // contentArea.value.scrollTo({ top: contentArea.value.scrollHeight });
   } catch (e) {
     console.log(e);
     errorMessage.value = 'An error occurred, please refresh and try again.';
   } finally {
     awaitingResponse.value = false;
   }
+
+  // Update router
+  router.push(`/chat/${chat.value.getChatId()}`);
 };
 
 // Update the chat name
@@ -106,15 +119,20 @@ watch(chatName, (name) => {
   chat.value.updateChatName({ name });
 });
 
-onMounted(async () => {
+const loadChat = async () => {
   const { id } = router.currentRoute.value.params;
   const isNewChat = !(id && !Array.isArray(id));
 
   try {
     if (isNewChat) {
       chat.value = new Chat({ name: chatName.value });
+      setChatId(chat.value.getChatId());
+      resetChatName();
     } else {
       chat.value = new Chat({ id });
+      setChatId(id);
+      updateChatName(chat.value.getChatName());
+      props.chatList.save();
     }
   } catch (e) {
     console.log(e);
@@ -144,6 +162,12 @@ onMounted(async () => {
     console.log(e);
     errorMessage.value = 'An error occurred, please refresh and try again.';
   }
+};
+
+watch(() => router.currentRoute.value.params.id, loadChat);
+
+onMounted(async () => {
+  await loadChat();
 });
 </script>
 

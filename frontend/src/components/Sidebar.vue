@@ -2,6 +2,27 @@
 import Gear from '@/assets/icons/Gear.vue';
 import Help from '@/assets/icons/Help.vue';
 import MessageIcon from '@/assets/icons/Message.vue';
+import { chatName } from '@/stores/useChatStore';
+import { Chat } from '@/utils/Chat';
+import { ChatList } from '@/utils/ChatList';
+import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
+const props = defineProps<{
+  chatList: ChatList;
+}>();
+
+const route = useRoute();
+
+const chats = ref(props.chatList.getChats().map((id) => new Chat({ id, skipMessagesLoad: true })));
+
+watch(
+  [route, chatName],
+  () => {
+    chats.value = props.chatList.getChats().map((id) => new Chat({ id, skipMessagesLoad: true }));
+  },
+  { flush: 'post' },
+);
 </script>
 
 <template>
@@ -19,7 +40,10 @@ import MessageIcon from '@/assets/icons/Message.vue';
 
     <!-- NEW CHAT -->
     <div class="px-4">
-      <div class="px-2 py-2 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer">
+      <div
+        class="px-2 py-2 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
+        @click="$router.push('/chat')"
+      >
         <MessageIcon class="fill-black"></MessageIcon>
         <span class="font-primary uppercase">New Chat</span>
       </div>
@@ -28,16 +52,25 @@ import MessageIcon from '@/assets/icons/Message.vue';
     <!-- ALL CHATS -->
     <h2 class="px-4 font-tertiary text-sm mt-6 mb-2">All Chats</h2>
     <div class="h-90 relative mb-auto">
-      <div class="px-4 flex flex-col gap-y-2 max-h-84 overflow-y-auto scrollbar-thumb-emerald!">
-        <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
-          <span class="font-primary text-neutral-300 group-hover:text-white duration-100">recent chat 1</span>
+      <div class="px-4 flex flex-col gap-y-2.5 max-h-84 overflow-y-auto scrollbar-thumb-emerald!">
+        <div
+          class="px-2 py-1.5 bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6 border border-transparent hover:border-emerald"
+          :class="{ 'border-emerald!': $route.params.id === chat.getChatId() }"
+          v-for="chat in chats"
+          @click="$router.push(`/chat/${chat.getChatId()}`)"
+        >
+          <span
+            class="font-primary text-neutral-300 group-hover:text-white duration-100"
+            :class="{ 'text-white!': $route.params.id === chat.getChatId() }"
+            >{{ chat.getChatName() }}</span
+          >
         </div>
-        <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
+        <!-- <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
           <span class="font-primary text-neutral-300 group-hover:text-white duration-100">recent chat 2</span>
         </div>
         <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
           <span class="font-primary text-neutral-300 group-hover:text-white duration-100">recent chat 3</span>
-        </div>
+        </div> -->
       </div>
       <div class="absolute bottom-6 w-72 h-6 bg-linear-to-b from-transparent to-coal z-100"></div>
     </div>

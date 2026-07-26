@@ -1,13 +1,21 @@
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
-const state = ref('New Chat');
+// State
+const state = reactive<{ name: string; id: string | null }>({ name: 'New Chat', id: null });
 
-export const chatName = computed(() => state.value);
+// Getters
+export const chatName = computed(() => state.name);
+export const chatId = computed(() => state.id);
 
+// Setters
 export const updateChatName = (name: string) => {
-  state.value = name;
+  state.name = name;
 };
 
 export const resetChatName = () => {
-  state.value = 'New Chat';
+  state.name = 'New Chat';
+};
+
+export const setChatId = (id: string) => {
+  state.id = id;
 };

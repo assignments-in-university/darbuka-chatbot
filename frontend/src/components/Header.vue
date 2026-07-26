@@ -3,7 +3,7 @@ import Gear from '@/assets/icons/Gear.vue';
 import Help from '@/assets/icons/Help.vue';
 import Tick from '@/assets/icons/Tick.vue';
 import { chatName, updateChatName } from '@/stores/useChatStore';
-import { computed, nextTick, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const input = ref(chatName.value);
 const canSave = computed(() => input.value !== chatName.value);
@@ -22,6 +22,12 @@ const updateInput = () => {
     notSaved.value = true;
   }
 };
+
+watch(chatName, (newName) => {
+  if (newName !== input.value) {
+    input.value = newName;
+  }
+});
 </script>
 
 <template>

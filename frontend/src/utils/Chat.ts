@@ -36,22 +36,29 @@ export class Chat {
     createdAt: new Date(),
   });
 
+  private areMessagesLoaded: boolean;
+
   constructor(options: { name: string });
-  constructor(options: { id: string });
-  constructor(options: { name: string; id: string }) {
+  constructor(options: { id: string; skipMessagesLoad?: boolean });
+  constructor(options: { name: string; id: string; skipMessagesLoad?: boolean }) {
     if (options.id) {
-      const chat = this.getChatFromStorage(options.id);
+      const chat = this.getChatFromStorage(options.id, options.skipMessagesLoad);
       if (!chat) throw Error('Chat ID does not exist or is invalid JSON.');
+
       this.chat = chat;
+
+      this.areMessagesLoaded = !options.skipMessagesLoad;
+      return;
     }
 
     if (options.name) {
       this.chat.id = crypto.randomUUID();
       this.chat.name = options.name;
     }
+    this.areMessagesLoaded = true;
   }
 
-  private getChatFromStorage(id: string): ChatData | null {
+  private getChatFromStorage(id: string, skipMessagesLoad?: boolean): ChatData | null {
     const data = localStorage.getItem(id);
 
     if (data) {
@@ -67,21 +74,22 @@ export class Chat {
           createdAt: new Date(),
         };
 
-        // Set id
+        // Set chat details
         parsedChat.id = id;
-
-        // Parse message dates
-        parsedChat.messages = unparsedChat.messages.map((m) => {
-          const { createdAt, ...msg } = m;
-          const parsedCreatedAt = new Date(m.createdAt);
-          return {
-            createdAt: parsedCreatedAt,
-            ...msg,
-          };
-        });
-
-        // Parse chat date
+        parsedChat.name = unparsedChat.name;
         parsedChat.createdAt = new Date(unparsedChat.createdAt);
+
+        if (!skipMessagesLoad) {
+          // Parse and set chat message dates
+          parsedChat.messages = unparsedChat.messages.map((m) => {
+            const { createdAt, ...msg } = m;
+            const parsedCreatedAt = new Date(m.createdAt);
+            return {
+              createdAt: parsedCreatedAt,
+              ...msg,
+            };
+          });
+        }
 
         return parsedChat;
       } catch (e) {
@@ -99,17 +107,29 @@ export class Chat {
   }
 
   public getMessages() {
+    if (!this.areMessagesLoaded) return [];
     return this.chat.messages;
   }
 
-  public updateChatName(options: { name: string; noSave?: boolean }) {
-    this.chat.name = options.name;
+  public getChatId() {
+    return this.chat.id;
+  }
 
+  public getChatName() {
+    return this.chat.name;
+  }
+
+  public updateChatName(options: { name: string; noSave?: boolean }) {
+    if (!this.areMessagesLoaded) return;
+
+    this.chat.name = options.name;
     if (options.noSave) return;
     this.save();
   }
 
   public newMessage(options: { text: string; isUser: boolean; noSave?: boolean }) {
+    if (!this.areMessagesLoaded) return;
+
     const message = {
       id: crypto.randomUUID(),
       message: options.text,
@@ -124,6 +144,8 @@ export class Chat {
   }
 
   public deleteMessageAndOnwards(options: { messageId: string; noSave?: boolean }) {
+    if (!this.areMessagesLoaded) return;
+
     const idx = this.chat.messages.findIndex((m) => m.id === options.messageId);
     if (idx === -1) return;
 
@@ -134,10 +156,12 @@ export class Chat {
   }
 
   public save() {
+    if (!this.areMessagesLoaded) return;
     this.saveChatInStorage(this.chat);
   }
 
   public exportMessagesCsv() {
+    if (!this.areMessagesLoaded) return;
     const csvLines = ['id,message,isUser,createdAt'];
 
     for (const msg of this.chat.messages) {
