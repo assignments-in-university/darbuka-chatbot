@@ -119,6 +119,10 @@ export class Chat {
     return this.chat.name;
   }
 
+  public getChatCreatedAt() {
+    return this.chat.createdAt;
+  }
+
   public updateChatName(options: { name: string; noSave?: boolean }) {
     if (!this.areMessagesLoaded) return;
 

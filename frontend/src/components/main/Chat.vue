@@ -133,6 +133,9 @@ const loadChat = async () => {
       setChatId(id);
       updateChatName(chat.value.getChatName());
       props.chatList.save();
+
+      await nextTick();
+      contentArea?.value?.scrollTo({ top: contentArea.value.scrollHeight });
     }
   } catch (e) {
     console.log(e);

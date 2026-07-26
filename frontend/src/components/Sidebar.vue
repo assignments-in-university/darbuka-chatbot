@@ -5,7 +5,7 @@ import MessageIcon from '@/assets/icons/Message.vue';
 import { chatName } from '@/stores/useChatStore';
 import { Chat } from '@/utils/Chat';
 import { ChatList } from '@/utils/ChatList';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps<{
@@ -23,6 +23,12 @@ watch(
   },
   { flush: 'post' },
 );
+
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit',
+  month: '2-digit',
+  year: '2-digit',
+});
 </script>
 
 <template>
@@ -54,23 +60,19 @@ watch(
     <div class="h-90 relative mb-auto">
       <div class="px-4 flex flex-col gap-y-2.5 max-h-84 overflow-y-auto scrollbar-thumb-emerald!">
         <div
-          class="px-2 py-1.5 bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6 border border-transparent hover:border-emerald"
+          class="text-sm px-2 py-1.5 bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6 border border-transparent hover:border-emerald flex items-center"
           :class="{ 'border-emerald!': $route.params.id === chat.getChatId() }"
           v-for="chat in chats"
           @click="$router.push(`/chat/${chat.getChatId()}`)"
         >
           <span
-            class="font-primary text-neutral-300 group-hover:text-white duration-100"
+            class="font-primary text-neutral-300 group-hover:text-white duration-100 mr-auto max-w-40 overflow-clip text-ellipsis text-nowrap"
             :class="{ 'text-white!': $route.params.id === chat.getChatId() }"
-            >{{ chat.getChatName() }}</span
           >
+            {{ chat.getChatName() }}
+          </span>
+          <span class="font-tertiary text-xs text-neutral-500">{{ dateFormatter.format(chat.getChatCreatedAt()) }}</span>
         </div>
-        <!-- <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
-          <span class="font-primary text-neutral-300 group-hover:text-white duration-100">recent chat 2</span>
-        </div>
-        <div class="px-2 py-2 hover:bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6">
-          <span class="font-primary text-neutral-300 group-hover:text-white duration-100">recent chat 3</span>
-        </div> -->
       </div>
       <div class="absolute bottom-6 w-72 h-6 bg-linear-to-b from-transparent to-coal z-100"></div>
     </div>
