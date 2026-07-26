@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import Message from './Message.vue';
 import Export from '@/assets/icons/Export.vue';
 import UpArrow from '@/assets/icons/UpArrow.vue';
 import { Chat } from '@/utils/Chat.js';
 import { useRouter } from 'vue-router';
+import { chatName } from '@/stores/useChatStore.js';
 
 // VUE
 const router = useRouter();
@@ -99,13 +100,19 @@ const sendMessage = async (e: KeyboardEvent) => {
   }
 };
 
+// Update the chat name
+watch(chatName, (name) => {
+  if (!chat.value) return;
+  chat.value.updateChatName({ name });
+});
+
 onMounted(async () => {
   const { id } = router.currentRoute.value.params;
   const isNewChat = !(id && !Array.isArray(id));
 
   try {
     if (isNewChat) {
-      chat.value = new Chat({ name: 'New Chat' });
+      chat.value = new Chat({ name: chatName.value });
     } else {
       chat.value = new Chat({ id });
     }
@@ -144,10 +151,7 @@ onMounted(async () => {
   <div class="w-full">
     <!-- CONTENT -->
     <div class="h-[calc(100svh-230px)] relative w-full">
-      <div
-        class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald"
-        ref="contentArea"
-      >
+      <div class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald" ref="contentArea">
         <Message
           v-if="!errorMessage && chat?.getMessages().length === 0"
           :data="{ message: 'loading...' }"

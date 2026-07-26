@@ -102,6 +102,13 @@ export class Chat {
     return this.chat.messages;
   }
 
+  public updateChatName(options: { name: string; noSave?: boolean }) {
+    this.chat.name = options.name;
+
+    if (options.noSave) return;
+    this.save();
+  }
+
   public newMessage(options: { text: string; isUser: boolean; noSave?: boolean }) {
     const message = {
       id: crypto.randomUUID(),
