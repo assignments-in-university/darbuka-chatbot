@@ -74,7 +74,13 @@ const LOAD_DURATION = 0.3;
       </div>
     </motion.div>
   </div>
-  <div class="last:mb-6" v-else>
+  <motion.div
+    v-else
+    class="last:mb-6"
+    :initial="{ opacity: 0, x: isUser ? 100 : -100, y: isUser ? -10 : 10 }"
+    :animate="{ opacity: 1, x: 0, y: 0 }"
+    :transition="{ duration: LOAD_DURATION, ease: 'backOut', y: { delay: isUser ? 0 : 0.03 }, x: { delay: isUser ? 0.03 : 0 } }"
+  >
     <div class="flex gap-x-2 items-end" :class="{ 'flex-row-reverse': isUser }">
       <div class="size-12 rounded-xl overflow-hidden border-emerald border">
         <img src="../../assets/images/logo.jpg" alt="logo" />
@@ -91,5 +97,5 @@ const LOAD_DURATION = 0.3;
       <Tick class="stroke-emerald size-6" v-if="isCopied"></Tick>
       <Copy class="fill-neutral-700 hover:fill-emerald duration-150 cursor-pointer size-6" @click="copyText" v-else></Copy>
     </div>
-  </div>
+  </motion.div>
 </template>

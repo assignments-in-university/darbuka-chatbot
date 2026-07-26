@@ -195,7 +195,10 @@ onMounted(async () => {
   <div class="w-full">
     <!-- CONTENT -->
     <div class="h-[calc(100svh-230px)] relative w-full">
-      <div class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald" ref="contentArea">
+      <div
+        class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald overflow-x-hidden"
+        ref="contentArea"
+      >
         <Message
           v-if="!errorMessage && chat?.getMessages().length === 0"
           :data="{ message: 'loading...' }"
