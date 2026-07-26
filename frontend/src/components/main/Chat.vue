@@ -216,8 +216,8 @@ onMounted(async () => {
       <motion.div
         class="p-2 w-[calc(80%-25px)] flex items-center justify-center flex-wrap absolute left-1/2 -translate-x-1/2 gap-2 z-100"
         v-if="chat?.getMessages().length === 1 && message.length === 0"
-        :initial="{ bottom: 80 }"
-        :animate="{ bottom: 144 }"
+        :initial="{ bottom: 80, opacity: 0 }"
+        :animate="{ bottom: 144, opacity: 1 }"
         :exit="{ bottom: 80 }"
       >
         <div
@@ -231,9 +231,11 @@ onMounted(async () => {
     </AnimatePresence>
 
     <!-- INPUT -->
-    <div
-      class="bg-neutral-800 p-2 w-[calc(80%-25px)] rounded-lg flex flex-col items-center absolute bottom-8 left-1/2 -translate-x-1/2 shadow-[0px_0px_40px_3px] shadow-transparent duration-500 gap-y-2 z-100 border border-transparent"
+    <motion.div
+      class="bg-neutral-800 p-2 w-[calc(80%-25px)] rounded-lg flex flex-col items-center absolute left-1/2 -translate-x-1/2 shadow-[0px_0px_40px_3px] shadow-transparent gap-y-2 z-100 border border-transparent transition-shadow duration-500"
       :class="{ 'shadow-verdant/20': isFocused }"
+      :initial="{ bottom: 0, opacity: 0 }"
+      :animate="{ bottom: 32, opacity: 1 }"
     >
       <textarea
         ref="textArea"
@@ -267,6 +269,6 @@ onMounted(async () => {
           <UpArrow class="stroke-neutral-500 duration-150" :class="{ 'stroke-black!': canSendMessage }"></UpArrow>
         </div>
       </div>
-    </div>
+    </motion.div>
   </div>
 </template>
