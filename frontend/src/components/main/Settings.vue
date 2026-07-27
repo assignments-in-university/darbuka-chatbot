@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Settings } from '@/utils/Settings';
+import { motion } from 'motion-v';
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -39,11 +40,28 @@ const saveSettings = () => {
 <template>
   <div class="h-full w-3/4 xl:w-1/2 mx-auto flex flex-col gap-y-4">
     <div class="space-y-2 mt-10">
-      <h1 class="text-4xl font-primary text-emerald font-medium">User Settings</h1>
-      <p class="font-secondary">Configure your interface and AI interactions</p>
+      <motion.h1
+        class="text-4xl font-primary text-emerald font-medium"
+        :initial="{ opacity: 0, x: -10 }"
+        :animate="{ opacity: 1, x: 0 }"
+        >User Settings</motion.h1
+      >
+      <motion.p
+        class="font-secondary"
+        :initial="{ opacity: 0, x: -10 }"
+        :animate="{ opacity: 1, x: 0 }"
+        :transition="{ delay: 0.1 }"
+        >Configure your interface and AI interactions</motion.p
+      >
     </div>
 
-    <form @submit.prevent="saveSettings" class="space-y-6 p-4 bg-neutral-900 rounded-md border border-neutral-700">
+    <motion.form
+      @submit.prevent="saveSettings"
+      class="space-y-6 p-4 bg-neutral-900 rounded-md border border-neutral-700"
+      :initial="{ opacity: 0, x: -10 }"
+      :animate="{ opacity: 1, x: 0 }"
+      :transition="{ delay: 0.2 }"
+    >
       <!-- Name Field -->
       <div class="flex flex-col gap-y-3">
         <label for="name" class="max-w-max text-xs font-medium font-tertiary uppercase">Display Name</label>
@@ -107,14 +125,21 @@ const saveSettings = () => {
 
       <!-- Save Button -->
       <button type="submit" class="w-full bg-emerald font-primary rounded-md py-1.5 text-black cursor-pointer">Save</button>
-    </form>
+    </motion.form>
 
     <div class="font-primary">
-      <h3 class="mt-4 mb-1">Settings Note:</h3>
-      <p class="text-sm text-neutral-300">
+      <motion.h3 class="mt-4 mb-1" :initial="{ opacity: 0, x: -10 }" :animate="{ opacity: 1, x: 0 }" :transition="{ delay: 0.3 }"
+        >Settings Note:</motion.h3
+      >
+      <motion.p
+        class="text-sm text-neutral-300"
+        :initial="{ opacity: 0, x: -10 }"
+        :animate="{ opacity: 1, x: 0 }"
+        :transition="{ delay: 0.4 }"
+      >
         Your information is used to provide better, more accurate responses. These fields are required to be filled before working
         with the chatbot.
-      </p>
+      </motion.p>
     </div>
   </div>
 </template>
