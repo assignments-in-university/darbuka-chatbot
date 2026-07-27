@@ -5,11 +5,13 @@ import MessageIcon from '@/assets/icons/Message.vue';
 import { chatName } from '@/stores/useChatStore';
 import { Chat } from '@/utils/Chat';
 import { ChatList } from '@/utils/ChatList';
+import { Settings } from '@/utils/Settings';
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps<{
   chatList: ChatList;
+  settings: Settings;
 }>();
 
 const route = useRoute();
@@ -106,8 +108,8 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
           <img src="" alt="" class="rounded-full" />
         </div>
         <div class="flex flex-col">
-          <h2 class="font-primary text-sm">Some User Name</h2>
-          <span class="text-xs font-tertiary text-emerald">Occupation</span>
+          <h2 class="font-primary text-sm">{{ settings.getDetails().name || 'N/A' }}</h2>
+          <span class="text-xs font-tertiary text-emerald">{{ settings.getDetails().skillLevel || 'N/A' }}</span>
         </div>
       </div>
     </div>

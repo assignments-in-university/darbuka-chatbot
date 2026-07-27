@@ -2,21 +2,34 @@
 import Header from '@/components/Header.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import { ChatList } from '@/utils/ChatList';
-import { ref } from 'vue';
+import { Settings } from '@/utils/Settings';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 const chatList = new ChatList();
+const settings = new Settings();
+
+const router = useRouter();
+
+onMounted(() => {
+  if (settings.getDetails().isLoaded) {
+    return router.push('/chat');
+  } else {
+    return router.push('/settings');
+  }
+});
 </script>
 
 <template>
   <div class="flex w-full">
-    <Sidebar :chat-list="chatList"></Sidebar>
+    <Sidebar :chat-list="chatList" :settings="settings"></Sidebar>
     <main class="flex-1">
       <Header></Header>
 
       <div
         class="text-white bg-neutral-950 h-[calc(100%-64px)] p-4 relative bg-[repeating-radial-gradient(var(--color-neutral-900)_0,var(--color-neutral-900)_1px,transparent_1px,transparent_100%)] bg-size-[20px_20px]"
       >
-        <RouterView :chat-list="chatList"></RouterView>
+        <RouterView :chat-list="chatList" :settings="settings"></RouterView>
       </div>
     </main>
   </div>

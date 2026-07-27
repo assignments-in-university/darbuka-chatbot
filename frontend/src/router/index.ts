@@ -6,7 +6,6 @@ const router = createRouter({
     {
       path: '/',
       component: () => import('../views/Index.vue'),
-      redirect: '/chat',
       children: [
         // NEW CHAT
         {

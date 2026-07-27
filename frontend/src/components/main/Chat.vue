@@ -8,9 +8,11 @@ import { useRouter } from 'vue-router';
 import { chatName, resetChatName, setChatId, updateChatName } from '@/stores/useChatStore.js';
 import { ChatList } from '@/utils/ChatList.js';
 import { AnimatePresence, motion } from 'motion-v';
+import { Settings } from '@/utils/Settings.js';
 
 const props = defineProps<{
   chatList: ChatList;
+  settings: Settings;
 }>();
 
 // VUE
@@ -187,6 +189,10 @@ const updateChatWithPredefinedMessage = (idx: number) => {
 };
 
 onMounted(async () => {
+  if (!props.settings.getDetails().isLoaded) {
+    return router.push('/settings');
+  }
+
   await loadChat();
 });
 </script>
