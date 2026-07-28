@@ -1,9 +1,16 @@
 import express from "express";
-import { handleAskedQuestions, handleWelcomeMessage } from "../controllers/chatbot.js";
+import {
+  ask,
+  welcome,
+  learnModeAsk,
+  learnModeWelcome,
+} from "../controllers/chatbot.js";
 
 const router = express.Router();
 
-router.route("/ask").post(handleAskedQuestions);
-router.route("/welcome").get(handleWelcomeMessage);
+router.route("/ask").post(ask);
+router.route("/welcome").post(welcome);
+router.route("/learn/ask").post(learnModeAsk);
+router.route("/learn/welcome").post(learnModeWelcome);
 
 export default router;

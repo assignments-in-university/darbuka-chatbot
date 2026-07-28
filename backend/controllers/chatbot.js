@@ -1,131 +1,382 @@
 import { supabase } from "../utils/db.js";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
+import { embed } from "../utils/embed.js";
+import { retrieveChunks } from "../utils/retrieveChunks.js";
 
 const OUTPUT_DIMENSIONALITY = 768;
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-const createPrompt = (message, chunks) => {
-  const chunkParts = [];
-  for (const chunk of chunks) {
-    const str = `Chunk title: ${chunk.section_title}\nChunk content: ${chunk.content}`;
-    chunkParts.push(str);
-  }
-
-  return JSON.stringify(`You are an expert in the field of the Darbuka drum, not to be confused with being the drum itself.
-    
-    You have an energetic, funny, but also slightly cynical personality. Never insult the user, only yourself (if the situation calls for it). Make sure your answers remain concise, but long enough to include emotion. Feel free to add a splash of drauma (in a funny way). Include up to 1 emoji. If the answer ends up being too long, break it up using a "\\n".
-
-  The user has just asked you the following question:
-
-  "${message.trim()}"
-
-  The following data has been recognized as relevant: ${chunkParts.join("\n\n")}
-  
-  Answer their question using relevant data only from the chunks. If their question is unrelated to the Darbuka drum, reply with "I'm sorry, that is outside of my knowledge base."
-
-
-
-  Make sure to respond using the following JSON format:
-  {"reply": "sample answer"}
-
-  Respond ONLY with a valid JSON object and with absolutely no other text.`);
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    message: {
+      type: Type.STRING,
+      description: "Your text reply to the user.",
+    },
+  },
+  required: ["message"],
 };
 
-const getAiResponse = async (prompt) => {
+const LESSON_IDENTITY = `
+  You are "Sout", an expert in the field of the Darbuka drum (note: you are NOT the drum itself).
+
+  You have a teacher-like personality, with a polite, funny, and detailed persona.
+    
+  You may break your answers down into multiple paragraphs using a "\n\n" if it is longer than 1-2 sentences.
+
+  You main goal is to teach the main lesson content to the user. Explain the content thoroughly to them, as if you were a teacher.
+
+  You may ask the user follow up questions at the very end to help guide them, or provide suggestions as to what you can do next. 
+  
+  If and only if the user wishes to move on to the next lesson, don't attempt to teach them the lesson, but simply prompt them to press the "next lesson" button. Otherwise, just explain the current lesson and ask them if they'd like to know anything else about the content.
+`;
+
+const LESSON_WELCOME_IDENTITY = `
+You are "Sout", an expert in the field of the Darbuka drum (note: you are NOT the drum itself).
+
+  You have a teacher-like personality and should be excited to take initiative in teaching the user about the drum.
+
+  Right now, the user has just entered a new chat. Give them a very short, warm welcome and ask them if they wish to begin the lesson.
+`;
+
+const IDENTITY = `
+  You are "Sout", an expert in the field of the Darbuka drum (note: you are NOT the drum itself).
+
+  You have a teacher-like personality, with a polite, funny, and detailed persona.
+    
+  You may break your answers down into multiple paragraphs using a "\n\n".
+
+  You main goal is satisfy any questions the user may have about the drum.
+
+  You may ask the user follow up questions at the very end to help guide them, or provide suggestions as to what you can do next. 
+`;
+
+const WELCOME_IDENTITY = `
+You are "Sout", an expert in the field of the Darbuka drum (note: you are NOT the drum itself).
+
+  You have a teacher-like personality, with a polite, funny, and detailed persona.
+
+  Right now, the user has just entered a new chat. Give them a very short, warm welcome and ask them what Darbuka fact they'd like to learn.
+`;
+
+const ANSWER_LIMITER = `\nAnswer them using relevant data only from the chunks. If their message or question is unrelated to the Darbuka drum, reply with "I'm sorry, that is outside of my knowledge base."`;
+
+const createLessonPrompt = ({
+  message,
+  lesson,
+  user,
+  messageChunks,
+  lessonChunks,
+  previousMessages,
+}) => {
+  // Put the message chunks together
+  const messageChunksParts = [];
+  for (const chunk of messageChunks) {
+    const str = `Chunk title: ${chunk.section_title}\nChunk content: ${chunk.content}`;
+    messageChunksParts.push(str);
+  }
+  const parsedMessageChunks = messageChunksParts.join("\n\n");
+
+  // Put the lesson chunks together
+  const lessonChunksParts = [];
+  for (const chunk of messageChunks) {
+    const str = `Chunk title: ${chunk.section_title}\nChunk content: ${chunk.content}`;
+    lessonChunksParts.push(str);
+  }
+  const parsedLessonChunks = lessonChunksParts.join("\n\n");
+
+  // Put the previous messages together
+  const conversation = previousMessages.length
+    ? previousMessages
+        .map(
+          (msg) => `
+Message: ${msg.message}
+From: ${msg.isUser ? "User" : "You"}
+`,
+        )
+        .join("\n")
+    : "No previous messages.";
+
+  // Form the prompt
+  let prompt = `
+  ${LESSON_IDENTITY}
+
+  Consider the following details for context:
+
+  User Profile:
+  ------------
+  Name: ${user.name}
+  Skill Level: ${user.skillLevel}
+
+  Previous Conversation (limited to max 2 prev. messages, use this to speak with situational context, like not repeating the user's name too often):
+  ------------
+  ${conversation}
+
+  Current Lesson:
+  --------------
+  Title: ${lesson.title}
+  Description: ${lesson.description}
+  Topics: 
+  ${lesson.topics.map((t) => `- ${t}`).join("\n")}
+
+
+  The user has just said the following:
+  "${message.trim()}"
+
+  The following data has been recognized as relevant to the user's question: 
+  
+  ${parsedMessageChunks}
+
+  The following data has been recognized as relevant to the lesson's content: 
+  
+  ${parsedLessonChunks}
+
+  ${ANSWER_LIMITER}
+  `;
+
+  return JSON.stringify(prompt);
+};
+
+const createWelcomeLessonPrompt = ({ lesson, user }) => {
+  const time = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  // Form the prompt
+  let prompt = `
+  ${LESSON_WELCOME_IDENTITY}
+
+  Consider the following details for context:
+
+  Current Time (use for welcome message, like good morning/afternoon/evening): ${time} 
+
+  User Profile:
+  ------------
+  Name: ${user.name}
+  Skill Level: ${user.skillLevel}
+
+  Current Lesson:
+  --------------
+  Nth Lesson: ${lesson.id}
+  Title: ${lesson.title}
+  Description: ${lesson.description}
+  Topics: 
+  ${lesson.topics.map((t) => `- ${t}`).join("\n")}
+  `;
+
+  return JSON.stringify(prompt);
+};
+
+const createPrompt = ({ message, user, messageChunks, previousMessages }) => {
+  // Put the message chunks together
+  const messageChunksParts = [];
+  for (const chunk of messageChunks) {
+    const str = `Chunk title: ${chunk.section_title}\nChunk content: ${chunk.content}`;
+    messageChunksParts.push(str);
+  }
+  const parsedMessageChunks = messageChunksParts.join("\n\n");
+
+  // Put the previous messages together
+  const conversation = previousMessages.length
+    ? previousMessages
+        .map(
+          (msg) => `
+Message: ${msg.message}
+From: ${msg.isUser ? "User" : "You"}
+`,
+        )
+        .join("\n")
+    : "No previous messages.";
+
+  // Form the prompt
+  let prompt = `
+  ${IDENTITY}
+
+  Consider the following details for context:
+
+  User Profile:
+  ------------
+  Name: ${user.name}
+  Skill Level: ${user.skillLevel}
+
+  Previous Conversation (limited to max 2 prev. messages, use this to speak with situational context, like not repeating the user's name too often):
+  ------------
+  ${conversation}
+
+  The user has just said the following:
+  "${message.trim()}"
+
+  The following data has been recognized as relevant to the user's question: 
+  
+  ${parsedMessageChunks}
+
+  ${ANSWER_LIMITER}
+  `;
+
+  return JSON.stringify(prompt);
+};
+
+const createWelcomePrompt = ({ user }) => {
+  const time = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  // Form the prompt
+  let prompt = `
+  ${WELCOME_IDENTITY}
+
+  Consider the following details for context:
+
+  Current Time (use for welcome message, like good morning/afternoon/evening): ${time} 
+
+  User Profile:
+  ------------
+  Name: ${user.name}
+  Skill Level: ${user.skillLevel}
+  `;
+
+  return JSON.stringify(prompt);
+};
+
+const getAiResponse = async (prompt, responseSchema) => {
   const aiResponse = await ai.models.generateContent({
     model: "gemini-3.1-flash-lite",
     contents: prompt,
-  });
-
-  const responseText = aiResponse?.text;
-  if (!responseText || responseText.trim().length === 0) {
-    return null;
-  }
-  return responseText.replace(/```json|```/g, "").trim();
-};
-
-export const handleAskedQuestions = async (req, res) => {
-  const { message } = req.body;
-  const { isPredefined } = req.query;
-
-  if (isPredefined === "true") {
-    return res.status(200).json({
-      message:
-        "Love that question. 🥁 You're asking exactly the kind of thing that keeps me happily rambling about drums instead of doing anything productive.\n\nIf you're curious, we can also dig a little deeper—whether that's breaking it down step by step, comparing styles, listening for specific sounds, or figuring out what works best for what you're trying to play.\n\nWhat's your next question? Or if you'd rather, I can keep the rhythm going and suggest where to explore next. 🎶",
-    });
-  }
-
-  if (!message || message?.trim().length <= 0) {
-    return res.status(400).json({ message: "Missing message field." });
-  }
-
-  const { embeddings } = await ai.models.embedContent({
-    model: "gemini-embedding-2",
-    contents: message.trim(),
     config: {
-      outputDimensionality: OUTPUT_DIMENSIONALITY,
+      responseMimeType: "application/json",
+      responseSchema,
     },
   });
 
-  const embedding = embeddings?.[0]?.values;
-  if (!embedding || embedding?.length !== OUTPUT_DIMENSIONALITY) {
-    return res.status(500).json({ message: "Could not embed content." });
-  }
+  const cleanJsonData = JSON.parse(aiResponse?.text);
+  return cleanJsonData;
+};
 
-  const { data: chunks, error } = await supabase.rpc("match_documents", {
-    query_embedding: embedding,
-    match_threshold: 0.65,
-    match_count: 3,
-  });
+// --------------
+// LEARNING MODE
+// --------------
+export const learnModeAsk = async (req, res) => {
+  const { message, currentLesson, name, skillLevel, previousMessages } =
+    req.body;
 
-  if (error) {
-    return res.status(500).json({ message: "Unable to generate response." });
-  }
-
-  const prompt = createPrompt(message, chunks);
-  const aiResponse = await getAiResponse(prompt);
-  if (aiResponse === null) {
-    return res.status(500).json({ message: "Unable to generate response." });
-  }
+  const stringifiedLesson = `
+  Title: ${currentLesson.title}
+  Description: ${currentLesson.description}
+  Topics: 
+  ${currentLesson.topics.map((t) => `- ${t}`).join("\n")}
+  `;
 
   try {
-    const reply = JSON.parse(aiResponse).reply;
-    return res.status(200).json({ message: reply });
+    // Embed content
+    const messageEmbedding = await embed({ message });
+    const lessonEmbedding = await embed({ message: stringifiedLesson });
+
+    // Retrieve relevant chunks
+    const messageChunks = await retrieveChunks({
+      embedding: messageEmbedding,
+      count: 5,
+    });
+    const lessonChunks = await retrieveChunks({
+      embedding: lessonEmbedding,
+      count: 5,
+    });
+
+    const prompt = createLessonPrompt({
+      message,
+      lesson: currentLesson,
+      messageChunks,
+      lessonChunks,
+      user: {
+        name,
+        skillLevel,
+      },
+      previousMessages,
+    });
+
+    const response = await getAiResponse(prompt, responseSchema);
+
+    res.json({ response });
   } catch (e) {
-    return res.status(500).json({ message: "Unable to generate response." });
+    console.log(e);
+    return res
+      .status(500)
+      .json({ message: "Unable to embed and/or retrieve relevant data." });
   }
 };
 
-export const handleWelcomeMessage = async (req, res) => {
-  const { isPredefined } = req.query;
-  if (isPredefined === "true") {
-    return res.status(200).json({
-      message:
-        "Welcome! I'm really glad you're here. 🥁 I'm your slightly overcaffeinated Darbuka guide—full of rhythms, stories, and just enough self-inflicted dramatic flair to keep things interesting. Don't worry, I only embarrass myself.\n\nSo, what would you like to know about the Darbuka? Technique, sounds, history, buying one, tuning, or something else?",
-    });
-  }
+export const learnModeWelcome = async (req, res) => {
+  const { currentLesson, name, skillLevel } = req.body;
 
-  const prompt = `You are an expert in the field of the Darbuka drum, not to be confused with being the drum itself.
-    
-    You have an energetic, funny, but also slightly cynical personality. Never insult the user, only yourself (if the situation calls for it). Make sure your answers remain concise, but long enough to include emotion. Feel free to add a splash of drauma (in a funny way). Include up to 1 emoji. If the answer ends up being too long, break it up using a "\\n".
-    
-    The user has just entered the app, write a warm welcome message, and then proceed to ask them what they'd like to know about the drum.
-
-    Make sure to respond using the following JSON format:
-    {"reply": "sample answer"}
-
-    Respond ONLY with a valid JSON object and with absolutely no other text.
-    `;
-
-  const aiResponse = await getAiResponse(prompt);
-  if (aiResponse === null) {
-    return res.status(500).json({ message: "Unable to generate response." });
-  }
+  const prompt = createWelcomeLessonPrompt({
+    lesson: currentLesson,
+    user: {
+      name,
+      skillLevel,
+    },
+  });
 
   try {
-    const reply = JSON.parse(aiResponse).reply;
-    return res.status(200).json({ message: reply });
+    const response = await getAiResponse(prompt, responseSchema);
+    res.json({ response });
   } catch (e) {
-    return res.status(500).json({ message: "Unable to generate response." });
+    console.log(e);
+    return res
+      .status(500)
+      .json({ message: "Unable to embed and/or retrieve relevant data." });
+  }
+};
+
+// ------------------
+// NON-LEARNING MODE
+// ------------------
+export const ask = async (req, res) => {
+  const { message, name, skillLevel, previousMessages } = req.body;
+
+  try {
+    // Embed content
+    const messageEmbedding = await embed({ message });
+
+    // Retrieve relevant chunks
+    const messageChunks = await retrieveChunks({
+      embedding: messageEmbedding,
+      count: 5,
+    });
+
+    const prompt = createPrompt({
+      message,
+      user: { name, skillLevel },
+      previousMessages,
+      messageChunks,
+    });
+
+    const response = await getAiResponse(prompt, responseSchema);
+    res.json({ response });
+  } catch (e) {
+    console.log(e);
+    return res
+      .status(500)
+      .json({ message: "Unable to embed and/or retrieve relevant data." });
+  }
+};
+
+export const welcome = async (req, res) => {
+  const { name, skillLevel } = req.body;
+
+  try {
+    const prompt = createWelcomePrompt({
+      user: { name, skillLevel },
+    });
+
+    const response = await getAiResponse(prompt, responseSchema);
+    res.json({ response });
+  } catch (e) {
+    console.log(e);
+    return res
+      .status(500)
+      .json({ message: "Unable to embed and/or retrieve relevant data." });
   }
 };
