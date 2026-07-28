@@ -165,11 +165,25 @@ export class Chat {
   }
 
   public exportMessagesCsv() {
-    if (!this.areMessagesLoaded) return;
+    if (!this.areMessagesLoaded) return '';
     const csvLines = ['id,message,isUser,createdAt'];
 
     for (const msg of this.chat.messages) {
-      const line = `${msg.id},${msg.message},${msg.isUser},${msg.createdAt}`;
+      const values = [msg.id, msg.message, msg.isUser, msg.createdAt.toISOString()];
+      const escapedValues = [];
+
+      for (const value of values) {
+        let stringVal = String(value);
+        stringVal = stringVal.replace(/"/g, '""');
+
+        if (stringVal.includes(',') || stringVal.includes('"') || stringVal.includes('\n') || stringVal.includes('\r')) {
+          stringVal = `"${stringVal}"`;
+        }
+
+        escapedValues.push(stringVal);
+      }
+
+      const line = escapedValues.join(',');
       csvLines.push(line);
     }
 

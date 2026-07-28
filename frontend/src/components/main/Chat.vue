@@ -56,6 +56,23 @@ const updateTextArea = () => {
   updateMessageSendingStatus();
 };
 
+const handleDownload = () => {
+  if (!chat.value) return;
+  const csvContent = chat.value.exportMessagesCsv();
+  const blob = new Blob(['\ufeff', csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `${chat.value.getChatName()}.csv`);
+  link.style.visibility = 'hidden';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 const sendMessage = async (e: KeyboardEvent | null) => {
   if (!chat.value || !contentArea.value) return;
   if (e) {
@@ -264,6 +281,7 @@ onMounted(async () => {
         <div class="flex-1">
           <div
             class="w-max flex gap-x-2 text-sm font-primary items-center px-4 py-1.5 bg-neutral-900 rounded-md hover:bg-emerald hover:text-black group duration-150 cursor-pointer"
+            @click="handleDownload"
           >
             <Export class="size-4.5 stroke-white group-hover:stroke-black duration-150"></Export>
             <span>Export CSV</span>
