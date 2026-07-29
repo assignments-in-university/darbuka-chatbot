@@ -50,7 +50,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     <div class="px-4">
       <div
         class="px-2 py-2 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
-        @click="$router.push('/chat')"
+        @click="$router.push('/chat/new')"
       >
         <MessageIcon class="fill-black"></MessageIcon>
         <span class="font-primary uppercase">New Chat</span>

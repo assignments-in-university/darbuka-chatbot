@@ -13,7 +13,7 @@ const router = useRouter();
 
 onMounted(() => {
   if (settings.getDetails().isLoaded) {
-    return router.push('/chat');
+    return router.push('/chat/new');
   } else {
     return router.push('/settings');
   }
