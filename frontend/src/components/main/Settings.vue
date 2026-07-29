@@ -39,9 +39,9 @@ const saveSettings = () => {
 
 <template>
   <div class="h-full w-3/4 xl:w-1/2 mx-auto flex flex-col gap-y-4">
-    <div class="space-y-2 mt-10">
+    <div class="space-y-2 text-center">
       <motion.h1
-        class="text-4xl font-primary text-emerald font-medium"
+        class="text-4xl font-primary text-emerald font-semibold"
         :initial="{ opacity: 0, x: -10 }"
         :animate="{ opacity: 1, x: 0 }"
         >User Settings</motion.h1
@@ -127,7 +127,7 @@ const saveSettings = () => {
       <button type="submit" class="w-full bg-emerald font-primary rounded-md py-1.5 text-black cursor-pointer">Save</button>
     </motion.form>
 
-    <div class="font-primary">
+    <div class="font-primary text-center">
       <motion.h3 class="mt-4 mb-1" :initial="{ opacity: 0, x: -10 }" :animate="{ opacity: 1, x: 0 }" :transition="{ delay: 0.3 }"
         >Settings Note:</motion.h3
       >
