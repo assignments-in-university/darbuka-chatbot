@@ -17,6 +17,7 @@ interface UnparsedMessage {
 interface ChatData {
   id: string;
   name: string;
+  isLearningMode: boolean;
   messages: Message[];
   createdAt: Date;
 }
@@ -24,6 +25,7 @@ interface ChatData {
 interface UnparsedChatData {
   id: string;
   name: string;
+  isLearningMode: boolean;
   messages: UnparsedMessage[];
   createdAt: string;
 }
@@ -33,14 +35,15 @@ export class Chat {
     id: '',
     messages: [],
     name: '',
+    isLearningMode: false,
     createdAt: new Date(),
   });
 
   private areMessagesLoaded: boolean;
 
-  constructor(options: { name: string });
+  constructor(options: { name: string; isLearningMode: boolean });
   constructor(options: { id: string; skipMessagesLoad?: boolean });
-  constructor(options: { name: string; id: string; skipMessagesLoad?: boolean }) {
+  constructor(options: { name: string; id: string; isLearningMode: boolean; skipMessagesLoad?: boolean }) {
     if (options.id) {
       const chat = this.getChatFromStorage(options.id, options.skipMessagesLoad);
       if (!chat) throw Error('Chat ID does not exist or is invalid JSON.');
@@ -54,6 +57,7 @@ export class Chat {
     if (options.name) {
       this.chat.id = crypto.randomUUID();
       this.chat.name = options.name;
+      this.chat.isLearningMode = options.isLearningMode;
     }
     this.areMessagesLoaded = true;
   }
@@ -70,6 +74,7 @@ export class Chat {
         const parsedChat: ChatData = {
           id: '',
           name: '',
+          isLearningMode: false,
           messages: [],
           createdAt: new Date(),
         };
@@ -77,6 +82,7 @@ export class Chat {
         // Set chat details
         parsedChat.id = id;
         parsedChat.name = unparsedChat.name;
+        parsedChat.isLearningMode = unparsedChat.isLearningMode;
         parsedChat.createdAt = new Date(unparsedChat.createdAt);
 
         if (!skipMessagesLoad) {
@@ -117,6 +123,10 @@ export class Chat {
 
   public getChatName() {
     return this.chat.name;
+  }
+
+  public isInLearningMode() {
+    return this.chat.isLearningMode;
   }
 
   public getChatCreatedAt() {

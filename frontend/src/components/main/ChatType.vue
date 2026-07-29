@@ -2,7 +2,33 @@
 import Learn from '@/assets/icons/Learn.vue';
 import Message from '@/assets/icons/Message.vue';
 import UpArrow from '@/assets/icons/UpArrow.vue';
+import { Settings } from '@/utils/Settings';
 import { motion } from 'motion-v';
+import { useRouter } from 'vue-router';
+
+const props = defineProps<{
+  settings: Settings;
+}>();
+
+const router = useRouter();
+
+const newNormalChat = () => {
+  if (props.settings.getDetails().areSettingsLoaded) {
+    return router.push('/chat');
+  }
+
+  router.push('/settings');
+};
+
+const newLearningChat = () => {
+  const details = props.settings.getDetails();
+
+  if (details.areSettingsLoaded && details.isCourseLoaded) {
+    return router.push('/chat?isLearningMode=true');
+  }
+
+  router.push('/settings');
+};
 </script>
 
 <template>
@@ -50,7 +76,7 @@ import { motion } from 'motion-v';
 
           <button
             class="w-full py-2 bg-emerald rounded-md text-lg text-black font-medium flex items-center justify-center gap-x-2 cursor-pointer"
-            @click="$router.push('/chat?isLearningMode=false')"
+            @click="newNormalChat"
           >
             Start Chatting
             <UpArrow class="rotate-90"></UpArrow>
@@ -75,7 +101,7 @@ import { motion } from 'motion-v';
 
           <button
             class="w-full py-2 border border-emerald rounded-md text-lg text-emerald font-medium flex items-center justify-center gap-x-2 cursor-pointer hover:bg-emerald/15 duration-150"
-            @click="$router.push('/chat?isLearningMode=true')"
+            @click="newLearningChat"
           >
             Start Learning
             <UpArrow class="rotate-90 stroke-emerald"></UpArrow>

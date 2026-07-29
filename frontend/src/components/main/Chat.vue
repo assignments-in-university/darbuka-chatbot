@@ -116,6 +116,8 @@ const sendMessage = async (e: KeyboardEvent | null) => {
 
       body: JSON.stringify({
         message: msgCopy,
+        name: props.settings.getDetails().name,
+        skillLevel: props.settings.getDetails().skillLevel,
       }),
     });
 
@@ -148,11 +150,16 @@ watch(chatName, (name) => {
 
 const loadChat = async () => {
   const { id } = router.currentRoute.value.params;
+  const { isLearningMode } = router.currentRoute.value.query;
   const isNewChat = !(id && !Array.isArray(id));
 
   try {
     if (isNewChat) {
-      chat.value = new Chat({ name: chatName.value });
+      chat.value = new Chat({
+        name: chatName.value,
+        isLearningMode: isLearningMode === 'true',
+      });
+
       setChatId(chat.value.getChatId());
       resetChatName();
     } else {
@@ -206,10 +213,6 @@ const updateChatWithPredefinedMessage = (idx: number) => {
 };
 
 onMounted(async () => {
-  if (!props.settings.getDetails().isLoaded) {
-    return router.push('/settings');
-  }
-
   await loadChat();
 });
 </script>

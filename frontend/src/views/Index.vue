@@ -12,7 +12,8 @@ const settings = new Settings();
 const router = useRouter();
 
 onMounted(() => {
-  if (settings.getDetails().isLoaded) {
+  const details = settings.getDetails();
+  if (details.areSettingsLoaded && details.isCourseLoaded) {
     return router.push('/chat/new');
   } else {
     return router.push('/settings');
