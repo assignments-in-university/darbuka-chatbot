@@ -260,6 +260,10 @@ const getAiResponse = async (prompt, responseSchema) => {
 // LEARNING MODE
 // --------------
 export const learnModeAsk = async (req, res) => {
+  const { isPredefined } = req.query;
+  if (isPredefined) {
+    return res.status(200).json({ message: "Insert predefined text here" });
+  }
   const { message, currentLesson, name, skillLevel, previousMessages } =
     req.body;
 
@@ -309,6 +313,10 @@ export const learnModeAsk = async (req, res) => {
 };
 
 export const learnModeWelcome = async (req, res) => {
+  const { isPredefined } = req.query;
+  if (isPredefined) {
+    return res.status(200).json({ message: "Insert predefined text here" });
+  }
   const { currentLesson, name, skillLevel } = req.body;
 
   const prompt = createWelcomeLessonPrompt({
@@ -334,6 +342,10 @@ export const learnModeWelcome = async (req, res) => {
 // NON-LEARNING MODE
 // ------------------
 export const ask = async (req, res) => {
+  const { isPredefined } = req.query;
+  if (isPredefined) {
+    return res.status(200).json({ message: "Insert predefined text here" });
+  }
   const { message, name, skillLevel, previousMessages } = req.body;
 
   try {
@@ -364,6 +376,10 @@ export const ask = async (req, res) => {
 };
 
 export const welcome = async (req, res) => {
+  const { isPredefined } = req.query;
+  if (isPredefined) {
+    return res.status(200).json({ message: "Insert predefined text here" });
+  }
   const { name, skillLevel } = req.body;
 
   try {
