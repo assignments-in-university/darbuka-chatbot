@@ -2,6 +2,7 @@ import { supabase } from "../utils/db.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import { embed } from "../utils/embed.js";
 import { retrieveChunks } from "../utils/retrieveChunks.js";
+import { LESSONS } from "../data/lessons.js";
 
 const OUTPUT_DIMENSIONALITY = 768;
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -15,6 +16,26 @@ const responseSchema = {
     },
   },
   required: ["message"],
+};
+
+const courseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    title: {
+      type: Type.STRING,
+      description: "The title of the course you have put together.",
+    },
+    description: {
+      type: Type.STRING,
+      description: "A 1-line description of the course you have put together.",
+    },
+    lessonIds: {
+      type: Type.ARRAY,
+      description: "A 1-line description of the course you have put together.",
+      items: { type: Type.NUMBER },
+    },
+  },
+  required: ["title", "description", "lessonIds"],
 };
 
 const LESSON_IDENTITY = `
@@ -394,5 +415,41 @@ export const welcome = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Unable to embed and/or retrieve relevant data." });
+  }
+};
+
+export const generateCourse = async (req, res) => {
+  const { skillLevel, goal, timeLimit } = req.body;
+
+  const prompt = `
+  You are an expert on the Darbuka drum. 
+
+  Your goal is to generate an appropriate course using the appropriate combination of predefined lessons.
+
+  Available lessons: 
+  ------------------
+  ${JSON.stringify(LESSONS)}
+
+  User Preferences:
+  -----------------
+  Skill Level: ${skillLevel}
+  Goal: ${goal}
+  Time Limit: ${timeLimit}
+  `;
+
+  try {
+    const response = await getAiResponse(prompt, courseSchema);
+    const lessons = response.lessonIds.map((id) =>
+      LESSONS.find((l) => l.id === id),
+    );
+
+    res.json({
+      title: response.title || "N/A",
+      description: response.description || "N/A",
+      lessons,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ message: "Unable to generate course." });
   }
 };
