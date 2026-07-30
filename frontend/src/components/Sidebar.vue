@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Gear from '@/assets/icons/Gear.vue';
 import Help from '@/assets/icons/Help.vue';
+import Learn from '@/assets/icons/Learn.vue';
 import MessageIcon from '@/assets/icons/Message.vue';
 import { chatName } from '@/stores/useChatStore';
 import { Chat } from '@/utils/Chat';
@@ -47,13 +48,25 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     </div>
 
     <!-- NEW CHAT -->
-    <div class="px-4">
+    <div class="px-4 mb-2">
       <div
-        class="px-2 py-2 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
+        class="px-2 py-1.5 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
         @click="$router.push('/chat/new')"
       >
         <MessageIcon class="fill-black"></MessageIcon>
         <span class="font-primary uppercase">New Chat</span>
+      </div>
+    </div>
+
+    <!-- COURSE -->
+    <div class="px-4">
+      <div
+        class="px-2 py-1.5 border border-verdant hover:bg-verdant/20 text-verdant rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
+        :class="{'bg-verdant/20': $route.fullPath === '/course'}"
+        @click="$router.push('/course')"
+      >
+        <Learn class="fill-verdant"></Learn>
+        <span class="font-primary uppercase">Darbuka Course</span>
       </div>
     </div>
 

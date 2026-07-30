@@ -22,6 +22,10 @@ const router = createRouter({
           component: () => import('../components/main/Chat.vue'),
         },
         {
+          path: '/course',
+          component: () => import('../components/main/Course.vue'),
+        },
+        {
           path: '/help',
           component: () => import('../components/main/Help.vue'),
         },
