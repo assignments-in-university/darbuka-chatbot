@@ -3,7 +3,7 @@
   "services": {
     "backend": {
       "root": "backend/",
-      "entrypoint": "index.js"
+      "entrypoint": "app.js"
     }
   },
   "routes": [
