@@ -7,6 +7,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { AnimatePresence, motion } from 'motion-v';
 import UpArrow from '@/assets/icons/UpArrow.vue';
+import Audio from '@/assets/icons/Audio.vue';
+import Mute from '@/assets/icons/Mute.vue';
 
 const canvas = ref<HTMLCanvasElement | null>(null);
 
@@ -197,7 +199,19 @@ function updateCameraView() {
   currentView.value = -1;
 }
 
-const isInViewMode = ref(false);
+const audio = ref<HTMLAudioElement | null>(null);
+const isPlaying = ref(true);
+
+const toggleAudio = () => {
+  if (!audio.value) return;
+  if (audio.value.paused) {
+    audio.value.play();
+    isPlaying.value = true;
+  } else {
+    audio.value.pause();
+    isPlaying.value = false;
+  }
+};
 
 watch(currentView, (v) => console.log(v));
 
@@ -478,12 +492,15 @@ onUnmounted(() => {
       <span>Back To Chatbot</span>
     </button>
 
-    <!-- <div class="absolute top-5 right-5 z-20 flex gap-2">
-      <div v-for="view in views" class="bg-emerald/20 text-white border border-emerald rounded-md px-4 py-1.5">
-        {{ view.name }}
-      </div>
-    </div> -->
-    
+    <audio src="audios/darbuka.mp3" autoplay ref="audio"></audio>
+    <div
+      class="absolute top-5 right-5 z-20 bg-emerald/20 text-white border border-emerald rounded-md size-10 flex items-center justify-center aspect-square cursor-pointer"
+      @click="toggleAudio"
+    >
+      <Audio class="size-5 stroke-emerald" v-if="isPlaying"></Audio>
+      <Mute class="size-5 stroke-emerald" v-else></Mute>
+    </div>
+
     <div class="absolute bottom-5 right-5 z-20 flex items-center gap-2">
       <p class="text-white w-40">Use the arrow keys to navigate views.</p>
       <div
