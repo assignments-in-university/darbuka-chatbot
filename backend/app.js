@@ -26,8 +26,12 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// LISTEN TO PORT
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log("Listening on port " + port);
-});
+if (process.env.NODE_ENV !== "production") {
+  // LISTEN TO PORT
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log("Listening on port " + port);
+  });
+}
+
+export default app;
