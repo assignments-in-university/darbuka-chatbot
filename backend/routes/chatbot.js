@@ -5,6 +5,7 @@ import {
   learnModeAsk,
   learnModeWelcome,
   generateCourse,
+  learnModeNextQuestion,
 } from "../controllers/chatbot.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ router.route("/ask").post(ask);
 router.route("/welcome").post(welcome);
 router.route("/learn/ask").post(learnModeAsk);
 router.route("/learn/welcome").post(learnModeWelcome);
+router.route("/learn/nextQuestion").post(learnModeNextQuestion);
 router.route("/generateCourse").post(generateCourse);
 
 export default router;

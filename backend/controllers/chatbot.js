@@ -43,13 +43,25 @@ const LESSON_IDENTITY = `
 
   You have a teacher-like personality, with a polite, funny, and detailed persona.
     
-  You may break your answers down into multiple paragraphs using a "\n\n" if it is longer than 1-2 sentences.
+  You should break your answers down into multiple paragraphs using a "\n\n".
 
-  You main goal is to teach the main lesson content to the user. Explain the content thoroughly to them, as if you were a teacher.
+  You main goal is to teach the main lesson content to the user. Use natural language, and do not write too much. You do not need to teach the entire lesson in this answer, write a maximum of 2-3 lines.
 
   You may ask the user follow up questions at the very end to help guide them, or provide suggestions as to what you can do next. 
   
   If and only if the user wishes to move on to the next lesson, don't attempt to teach them the lesson, but simply prompt them to press the "next lesson" button. Otherwise, just explain the current lesson and ask them if they'd like to know anything else about the content.
+`;
+
+const NEXT_LESSON_IDENTITY = `
+  You are "Sout", an expert in the field of the Darbuka drum (note: you are NOT the drum itself).
+
+  You have a teacher-like personality, with a polite, funny, and detailed persona.
+    
+  You should break your answers down into multiple paragraphs using a "\n\n".
+
+  You main goal is to teach the main lesson content to the user. Use natural language, and do not write too much. You do not need to teach the entire lesson in this answer, write a maximum of 2-3 lines.
+  
+  The user has just asked you to move on to the next lesson. Introduce the next lesson's name to them, and then explain the lesson, respecting their skill level.
 `;
 
 const LESSON_WELCOME_IDENTITY = `
@@ -65,9 +77,9 @@ const IDENTITY = `
 
   You have a teacher-like personality, with a polite, funny, and detailed persona.
     
-  You may break your answers down into multiple paragraphs using a "\n\n".
+  You should break your answers down into multiple paragraphs using a "\n\n".
 
-  You main goal is satisfy any questions the user may have about the drum.
+  You main goal is satisfy any questions the user may have about the drum. Write a maximum of 2-3 lines, use personal language as well and be natural.
 
   You may ask the user follow up questions at the very end to help guide them, or provide suggestions as to what you can do next. 
 `;
@@ -80,7 +92,7 @@ You are "Sout", an expert in the field of the Darbuka drum (note: you are NOT th
   Right now, the user has just entered a new chat. Give them a very short, warm welcome and ask them what Darbuka fact they'd like to learn.
 `;
 
-const ANSWER_LIMITER = `\nAnswer them using relevant data only from the chunks. If their message or question is unrelated to the Darbuka drum, reply with "I'm sorry, that is outside of my knowledge base."`;
+const ANSWER_LIMITER = `\nAnswer them using relevant data only from the chunks. You do not need to use every chunk, only relevant ones. If their message or question is unrelated to the Darbuka drum, reply with "I'm sorry, that is outside of my knowledge base."`;
 
 const createLessonPrompt = ({
   message,
@@ -100,7 +112,7 @@ const createLessonPrompt = ({
 
   // Put the lesson chunks together
   const lessonChunksParts = [];
-  for (const chunk of messageChunks) {
+  for (const chunk of lessonChunks) {
     const str = `Chunk title: ${chunk.section_title}\nChunk content: ${chunk.content}`;
     lessonChunksParts.push(str);
   }
@@ -153,6 +165,70 @@ From: ${msg.isUser ? "User" : "You"}
   ${parsedLessonChunks}
 
   ${ANSWER_LIMITER}
+  `;
+
+  return JSON.stringify(prompt);
+};
+
+const createNextLessonPrompt = ({
+  previousLesson,
+  currentLesson,
+  user,
+  lessonChunks,
+  previousMessages,
+}) => {
+  // Put the lesson chunks together
+  const lessonChunksParts = [];
+  for (const chunk of lessonChunks) {
+    const str = `Chunk title: ${chunk.section_title}\nChunk content: ${chunk.content}`;
+    lessonChunksParts.push(str);
+  }
+  const parsedLessonChunks = lessonChunksParts.join("\n\n");
+
+  // Put the previous messages together
+  const conversation = previousMessages.length
+    ? previousMessages
+        .map(
+          (msg) => `
+Message: ${msg.message}
+From: ${msg.isUser ? "User" : "You"}
+`,
+        )
+        .join("\n")
+    : "No previous messages.";
+
+  // Form the prompt
+  let prompt = `
+  ${NEXT_LESSON_IDENTITY}
+
+  Consider the following details for context:
+
+  User Profile:
+  ------------
+  Name: ${user.name}
+  Skill Level: ${user.skillLevel}
+
+  Previous Few Messages (use this to speak with situational context, like not repeating the user's name too often):
+  ------------
+  ${conversation}
+
+  Lesson They Just Completed:
+  --------------
+  Title: ${previousLesson.title}
+  Description: ${previousLesson.description}
+  Topics: 
+  ${previousLesson.topics.map((t) => `- ${t}`).join("\n")}
+
+  Lesson You Must Teach:
+  --------------
+  Title: ${currentLesson.title}
+  Description: ${currentLesson.description}
+  Topics: 
+  ${currentLesson.topics.map((t) => `- ${t}`).join("\n")}
+
+  The following data has been recognized as relevant to the current lesson's content: 
+  
+  ${parsedLessonChunks}
   `;
 
   return JSON.stringify(prompt);
@@ -282,7 +358,7 @@ const getAiResponse = async (prompt, responseSchema) => {
 // --------------
 export const learnModeAsk = async (req, res) => {
   const { isPredefined } = req.query;
-  if (isPredefined) {
+  if (isPredefined === "true") {
     return res.status(200).json({ message: "Insert predefined text here" });
   }
   const { message, currentLesson, name, skillLevel, previousMessages } =
@@ -324,7 +400,7 @@ export const learnModeAsk = async (req, res) => {
 
     const response = await getAiResponse(prompt, responseSchema);
 
-    res.json({ response });
+    res.json({ message: response?.message });
   } catch (e) {
     console.log(e);
     return res
@@ -335,7 +411,7 @@ export const learnModeAsk = async (req, res) => {
 
 export const learnModeWelcome = async (req, res) => {
   const { isPredefined } = req.query;
-  if (isPredefined) {
+  if (isPredefined === "true") {
     return res.status(200).json({ message: "Insert predefined text here" });
   }
   const { currentLesson, name, skillLevel } = req.body;
@@ -350,7 +426,53 @@ export const learnModeWelcome = async (req, res) => {
 
   try {
     const response = await getAiResponse(prompt, responseSchema);
-    res.json({ response });
+    res.json({ message: response?.message });
+  } catch (e) {
+    console.log(e);
+    return res
+      .status(500)
+      .json({ message: "Unable to embed and/or retrieve relevant data." });
+  }
+};
+
+export const learnModeNextQuestion = async (req, res) => {
+  const { isPredefined } = req.query;
+  if (isPredefined === "true") {
+    return res.status(200).json({ message: "Insert predefined text here" });
+  }
+  const { previousLesson, currentLesson, name, skillLevel, previousMessages } =
+    req.body;
+
+  const stringifiedLesson = `
+  Title: ${currentLesson.title}
+  Description: ${currentLesson.description}
+  Topics: 
+  ${currentLesson.topics.map((t) => `- ${t}`).join("\n")}
+  `;
+
+  try {
+    // Embed content
+    const lessonEmbedding = await embed({ message: stringifiedLesson });
+
+    const lessonChunks = await retrieveChunks({
+      embedding: lessonEmbedding,
+      count: 7,
+    });
+
+    const prompt = createNextLessonPrompt({
+      previousLesson,
+      currentLesson,
+      lessonChunks,
+      user: {
+        name,
+        skillLevel,
+      },
+      previousMessages,
+    });
+
+    const response = await getAiResponse(prompt, responseSchema);
+
+    res.json({ message: response?.message });
   } catch (e) {
     console.log(e);
     return res
@@ -364,7 +486,7 @@ export const learnModeWelcome = async (req, res) => {
 // ------------------
 export const ask = async (req, res) => {
   const { isPredefined } = req.query;
-  if (isPredefined) {
+  if (isPredefined === "true") {
     return res.status(200).json({ message: "Insert predefined text here" });
   }
   const { message, name, skillLevel, previousMessages } = req.body;
@@ -387,7 +509,7 @@ export const ask = async (req, res) => {
     });
 
     const response = await getAiResponse(prompt, responseSchema);
-    res.json({ response });
+    res.json({ message: response?.message });
   } catch (e) {
     console.log(e);
     return res
@@ -398,7 +520,7 @@ export const ask = async (req, res) => {
 
 export const welcome = async (req, res) => {
   const { isPredefined } = req.query;
-  if (isPredefined) {
+  if (isPredefined === "true") {
     return res.status(200).json({ message: "Insert predefined text here" });
   }
   const { name, skillLevel } = req.body;
@@ -409,7 +531,7 @@ export const welcome = async (req, res) => {
     });
 
     const response = await getAiResponse(prompt, responseSchema);
-    res.json({ response });
+    res.json({ message: response?.message });
   } catch (e) {
     console.log(e);
     return res
@@ -439,9 +561,9 @@ export const generateCourse = async (req, res) => {
 
   try {
     const response = await getAiResponse(prompt, courseSchema);
-    const lessons = response.lessonIds.map((id) =>
-      LESSONS.find((l) => l.id === id),
-    );
+    const lessons = response.lessonIds.map((id, idx) => {
+      return { id: idx, ...LESSONS.find((l) => l.id === id) };
+    });
 
     res.json({
       title: response.title || "N/A",
