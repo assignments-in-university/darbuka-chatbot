@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Drum from '@/assets/icons/Drum.vue';
 import Gear from '@/assets/icons/Gear.vue';
 import Help from '@/assets/icons/Help.vue';
 import Learn from '@/assets/icons/Learn.vue';
@@ -62,7 +63,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     <div class="px-4">
       <div
         class="px-2 py-1.5 border border-verdant hover:bg-verdant/20 text-verdant rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
-        :class="{'bg-verdant/20': $route.fullPath === '/course'}"
+        :class="{ 'bg-verdant/20': $route.fullPath === '/course' }"
         @click="$router.push('/course')"
       >
         <Learn class="fill-verdant"></Learn>
@@ -95,14 +96,14 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
       <div class="absolute bottom-6 w-72 h-6 bg-linear-to-b from-transparent to-coal z-100"></div>
     </div>
 
-    <!-- HELP AND SETTINGS -->
+    <!-- VISUALIZER AND SETTINGS -->
     <div class="px-4 space-y-2">
       <RouterLink
-        to="/help"
+        to="/visualizer"
         class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group"
       >
-        <Help class="size-6 p-0.5 fill-neutral-300 group-hover:fill-white duration-100"></Help>
-        <span class="font-primary text-neutral-300 group-hover:text-white duration-100 uppercase">Help</span>
+        <Drum class="size-6 p-0.5 stroke-neutral-300 group-hover:stroke-white duration-100"></Drum>
+        <span class="font-primary text-neutral-300 group-hover:text-white duration-100 uppercase">Visualizer</span>
       </RouterLink>
       <RouterLink
         to="/settings"

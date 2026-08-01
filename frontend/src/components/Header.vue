@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Drum from '@/assets/icons/Drum.vue';
 import Gear from '@/assets/icons/Gear.vue';
 import Help from '@/assets/icons/Help.vue';
 import Tick from '@/assets/icons/Tick.vue';
@@ -55,7 +56,7 @@ watch(chatName, (newName) => {
 
     <div class="flex items-center gap-x-4">
       <Gear class="stroke-neutral-400 size-6 cursor-pointer" @click="$router.push('/settings')"></Gear>
-      <Help class="fill-neutral-400 size-5 cursor-pointer" @click="$router.push('/help')"></Help>
+      <Drum class="stroke-neutral-400 size-5 cursor-pointer" @click="$router.push('/visualizer')"></Drum>
     </div>
   </header>
 </template>
