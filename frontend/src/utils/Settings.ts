@@ -143,6 +143,22 @@ export class Settings {
     }
   }
 
+  getPreviousLesson() {
+    const pos = this.state.course?.lessons.findIndex((l) => l.id === this.state.currentLessonId) || 0;
+    return this.state.course?.lessons[pos - 1 >= 0 ? pos - 1 : 0];
+  }
+
+  getCurrentLesson() {
+    return this.state.course?.lessons.find((l) => l.id === this.state.currentLessonId);
+  }
+
+  isLastLesson() {
+    return (
+      this.state.course?.lessons.find((l) => l.id === this.state.currentLessonId)?.id ===
+      this.state.course?.lessons.slice(-1)[0]?.id
+    );
+  }
+
   async generateCourse() {
     if (!this.state.goal || !this.state.timeLimit || !this.state.skillLevel) {
       return;

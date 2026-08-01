@@ -11,6 +11,8 @@
   --font-tertiary: 'Space Mono';
 }
 
+/* #00FF90 */
+
 body {
   @apply bg-white dark:bg-black;
 }

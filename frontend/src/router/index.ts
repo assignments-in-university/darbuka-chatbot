@@ -35,6 +35,10 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: '/visualizer',
+      component: () => import('../views/Visualizer.vue'),
+    },
   ],
 });
 

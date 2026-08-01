@@ -199,4 +199,14 @@ export class Chat {
 
     return csvLines.join('\n');
   }
+
+  public getRecentMessages(options?: { count?: number; skipLastQuestion?: boolean }) {
+    const formattedOptions = {
+      count: options?.count ?? 3,
+      skipLastQuestion: options?.skipLastQuestion ?? true,
+    };
+    return formattedOptions.skipLastQuestion
+      ? this.chat.messages.slice(-formattedOptions.count, -1)
+      : this.chat.messages.slice(-formattedOptions.count);
+  }
 }

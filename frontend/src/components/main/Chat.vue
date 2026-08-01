@@ -73,7 +73,7 @@ const handleDownload = () => {
   URL.revokeObjectURL(url);
 };
 
-const sendMessage = async (e: KeyboardEvent | null) => {
+const sendMessage = async (e: KeyboardEvent | null, isNextLesson?: boolean) => {
   if (!chat.value || !contentArea.value) return;
   if (e) {
     if (e.shiftKey) return;
@@ -89,10 +89,19 @@ const sendMessage = async (e: KeyboardEvent | null) => {
   props.chatList.addChat(chat.value.getChatId());
 
   // Write user message
-  chat.value.newMessage({
-    text: message.value,
-    isUser: true,
-  });
+  if (isNextLesson) {
+    chat.value.newMessage({
+      text: 'Next Lesson Please!',
+      isUser: true,
+    });
+
+    props.settings.updateDetails({ currentLessonId: props.settings.getDetails().currentLessonId! + 1 });
+  } else {
+    chat.value.newMessage({
+      text: message.value,
+      isUser: true,
+    });
+  }
 
   // Update awaiting response
   awaitingResponse.value = true;
@@ -108,18 +117,53 @@ const sendMessage = async (e: KeyboardEvent | null) => {
 
   // Begin fetching response
   try {
-    const res = await fetch('http://localhost:3000/chatbot/ask?isPredefined=true', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    let res;
 
-      body: JSON.stringify({
-        message: msgCopy,
-        name: props.settings.getDetails().name,
-        skillLevel: props.settings.getDetails().skillLevel,
-      }),
-    });
+    if (isNextLesson) {
+      res = await fetch('http://localhost:3000/chatbot/learn/nextQuestion?isPredefined=false', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          previousLesson: props.settings.getPreviousLesson(),
+          currentLesson: props.settings.getCurrentLesson(),
+          name: props.settings.getDetails().name,
+          skillLevel: props.settings.getDetails().skillLevel,
+          previousMessages: chat.value.getRecentMessages({ skipLastQuestion: false }),
+        }),
+      });
+    } else if (chat.value.isInLearningMode()) {
+      res = await fetch('http://localhost:3000/chatbot/learn/ask?isPredefined=false', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          message: msgCopy,
+          currentLesson: props.settings.getCurrentLesson(),
+          name: props.settings.getDetails().name,
+          skillLevel: props.settings.getDetails().skillLevel,
+          previousMessages: chat.value.getRecentMessages(),
+        }),
+      });
+    } else {
+      res = await fetch('http://localhost:3000/chatbot/ask?isPredefined=false', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          message: msgCopy,
+          name: props.settings.getDetails().name,
+          skillLevel: props.settings.getDetails().skillLevel,
+          previousMessages: chat.value.getRecentMessages(),
+        }),
+      });
+    }
 
     const jsonRes = await res.json();
     if (!jsonRes || !jsonRes?.message || !jsonRes.message.length) {
@@ -138,8 +182,10 @@ const sendMessage = async (e: KeyboardEvent | null) => {
     awaitingResponse.value = false;
   }
 
-  // Update router
-  router.push(`/chat/${chat.value.getChatId()}`);
+  // Update router (if needed)
+  if (!router.currentRoute.value.params?.id) {
+    router.push(`/chat/${chat.value.getChatId()}`);
+  }
 };
 
 // Update the chat name
@@ -180,9 +226,35 @@ const loadChat = async () => {
   // Only continue to load welcome message if this is a new chat
   if (!isNewChat) return;
 
-  // Load welcome message
+  // Load welcome message (depending on chat type)
   try {
-    const res = await fetch('http://localhost:3000/chatbot/welcome?isPredefined=true', { method: 'GET' });
+    let res;
+    if (chat.value.isInLearningMode()) {
+      res = await fetch('http://localhost:3000/chatbot/learn/welcome?isPredefined=false', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          currentLesson: props.settings.getCurrentLesson(),
+          name: props.settings.getDetails().name,
+          skillLevel: props.settings.getDetails().skillLevel,
+        }),
+      });
+    } else {
+      res = await fetch('http://localhost:3000/chatbot/welcome?isPredefined=false', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          name: props.settings.getDetails().name,
+          skillLevel: props.settings.getDetails().skillLevel,
+        }),
+      });
+    }
     const json = await res.json();
     const welcomeMsg = json?.message || '';
 
@@ -281,9 +353,18 @@ onMounted(async () => {
         @keydown.enter="sendMessage"
       ></textarea>
       <div class="w-full flex">
-        <div class="flex-1">
+        <div class="flex-1 flex gap-x-2">
           <div
-            class="w-max flex gap-x-2 text-sm font-primary items-center px-4 py-1.5 bg-neutral-900 rounded-md hover:bg-emerald hover:text-black group duration-150 cursor-pointer"
+            class="w-max flex gap-x-2 text-sm font-primary items-center px-4 py-1.5 bg-emerald/20 rounded-md hover:bg-emerald border border-emerald hover:text-black group duration-150 cursor-pointer"
+            :class="{'opacity-50 pointer-events-none': settings.isLastLesson()}"
+            v-if="chat?.isInLearningMode()"
+            @click="sendMessage(null, true)"
+          >
+            <UpArrow class="rotate-90 size-4.5 stroke-emerald group-hover:stroke-black duration-150"></UpArrow>
+            <span class="text-emerald duration-150 group-hover:text-black">Next Lesson</span>
+          </div>
+          <div
+            class="w-max flex gap-x-2 text-sm font-primary items-center px-4 py-1.5 bg-neutral-900 rounded-md hover:bg-emerald border border-neutral-700 hover:text-black group duration-150 cursor-pointer"
             @click="handleDownload"
           >
             <Export class="size-4.5 stroke-white group-hover:stroke-black duration-150"></Export>

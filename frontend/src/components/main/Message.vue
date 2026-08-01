@@ -86,14 +86,14 @@ const LOAD_DURATION = 0.3;
         <img src="../../assets/images/logo.jpg" alt="logo" />
       </div>
       <div
-        class="w-3/5 bg-neutral-900 p-4 rounded-xl space-y-4 font-primary duration-150 border border-transparent overflow-hidden"
+        class="w-7/10 bg-neutral-900 p-4 rounded-xl space-y-4 font-primary duration-150 border border-transparent overflow-hidden"
         :class="{ 'border-emerald! border-dashed': isUser, 'border-rose-500! text-rose-500 border-dashed': isError }"
       >
         <p v-for="paragraph in paragraphs" class="w-full">{{ paragraph }}</p>
       </div>
     </div>
 
-    <div class="flex gap-x-1 mt-2 w-3/5 items-end ml-14 justify-end" v-if="!isUser">
+    <div class="flex gap-x-1 mt-2 w-7/10 items-end ml-14 justify-end" v-if="!isUser">
       <Tick class="stroke-emerald size-6" v-if="isCopied"></Tick>
       <Copy class="fill-neutral-700 hover:fill-emerald duration-150 cursor-pointer size-6" @click="copyText" v-else></Copy>
     </div>
