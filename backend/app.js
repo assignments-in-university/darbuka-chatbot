@@ -8,7 +8,10 @@ import chatbotRouter from "./routes/chatbot.js";
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "https://sout-chatbot-frontend.vercel.app",
+      "http://localhost:5173",
+    ],
   }),
 );
 app.use(json());
@@ -26,12 +29,8 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-if (process.env.NODE_ENV !== "production") {
-  // LISTEN TO PORT
-  const port = process.env.PORT || 3000;
-  app.listen(port, () => {
-    console.log("Listening on port " + port);
-  });
-}
-
-export default app;
+// LISTEN TO PORT
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log("Listening on port " + port);
+});
