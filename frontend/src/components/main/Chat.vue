@@ -9,6 +9,7 @@ import { chatName, resetChatName, setChatId, updateChatName } from '@/stores/use
 import { ChatList } from '@/utils/ChatList.js';
 import { AnimatePresence, motion } from 'motion-v';
 import { Settings } from '@/utils/Settings.js';
+import { getEndpoint } from '@/utils/getEndpoint.js';
 
 const props = defineProps<{
   chatList: ChatList;
@@ -120,7 +121,7 @@ const sendMessage = async (e: KeyboardEvent | null, isNextLesson?: boolean) => {
     let res;
 
     if (isNextLesson) {
-      res = await fetch('http://localhost:3000/chatbot/learn/nextQuestion?isPredefined=false', {
+      res = await fetch(`${getEndpoint()}/chatbot/learn/nextQuestion?isPredefined=false`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +136,7 @@ const sendMessage = async (e: KeyboardEvent | null, isNextLesson?: boolean) => {
         }),
       });
     } else if (chat.value.isInLearningMode()) {
-      res = await fetch('http://localhost:3000/chatbot/learn/ask?isPredefined=false', {
+      res = await fetch(`${getEndpoint()}/chatbot/learn/ask?isPredefined=false`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ const sendMessage = async (e: KeyboardEvent | null, isNextLesson?: boolean) => {
         }),
       });
     } else {
-      res = await fetch('http://localhost:3000/chatbot/ask?isPredefined=false', {
+      res = await fetch(`${getEndpoint()}/chatbot/ask?isPredefined=false`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -230,7 +231,7 @@ const loadChat = async () => {
   try {
     let res;
     if (chat.value.isInLearningMode()) {
-      res = await fetch('http://localhost:3000/chatbot/learn/welcome?isPredefined=false', {
+      res = await fetch(`${getEndpoint()}/chatbot/learn/welcome?isPredefined=false`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +244,7 @@ const loadChat = async () => {
         }),
       });
     } else {
-      res = await fetch('http://localhost:3000/chatbot/welcome?isPredefined=false', {
+      res = await fetch(`${getEndpoint()}/chatbot/welcome?isPredefined=false`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

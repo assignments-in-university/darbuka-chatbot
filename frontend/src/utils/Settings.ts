@@ -1,4 +1,5 @@
 import { reactive } from 'vue';
+import { getEndpoint } from './getEndpoint';
 
 interface Lesson {
   id: number;
@@ -165,7 +166,7 @@ export class Settings {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/chatbot/generateCourse', {
+      const res = await fetch(`${getEndpoint()}/chatbot/generateCourse`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
