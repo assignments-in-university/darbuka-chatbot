@@ -10,7 +10,7 @@ import { ChatList } from '@/utils/ChatList';
 import { Settings } from '@/utils/Settings';
 import { AnimatePresence, motion } from 'motion-v';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   chatList: ChatList;
@@ -23,6 +23,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const router = useRouter();
 
 const isWindowMd = ref(false);
 
@@ -44,6 +45,21 @@ watch(
 
 const handleResize = () => {
   isWindowMd.value = window.innerWidth < 768;
+};
+
+const goToNewChat = () => {
+  router.push(`/chat/new`);
+  emit('toggle-sidebar');
+};
+
+const goToCourse = () => {
+  router.push(`/course`);
+  emit('toggle-sidebar');
+};
+
+const goToChat = (chat: Chat) => {
+  router.push(`/chat/${chat.getChatId()}`);
+  emit('toggle-sidebar');
 };
 
 onMounted(() => {
@@ -83,7 +99,7 @@ onUnmounted(() => {
     <div class="px-4 mb-2 min-w-72">
       <div
         class="px-2 py-1.5 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
-        @click="$router.push('/chat/new')"
+        @click="goToNewChat"
       >
         <MessageIcon class="fill-black"></MessageIcon>
         <span class="font-primary uppercase">New Chat</span>
@@ -95,7 +111,7 @@ onUnmounted(() => {
       <div
         class="px-2 py-1.5 border border-verdant hover:bg-verdant/20 text-verdant rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
         :class="{ 'bg-verdant/20': $route.fullPath === '/course' }"
-        @click="$router.push('/course')"
+        @click="goToCourse"
       >
         <Learn class="fill-verdant"></Learn>
         <span class="font-primary uppercase">Darbuka Course</span>
@@ -110,7 +126,7 @@ onUnmounted(() => {
           class="text-sm px-2 py-1.5 bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6 border border-transparent hover:border-emerald flex items-center"
           :class="{ 'border-emerald!': $route.params.id === chat.getChatId() }"
           v-for="chat in chats"
-          @click="$router.push(`/chat/${chat.getChatId()}`)"
+          @click="goToChat(chat as Chat)"
         >
           <span
             class="font-primary text-neutral-300 group-hover:text-white duration-100 mr-auto max-w-40 overflow-clip text-ellipsis text-nowrap"
@@ -131,6 +147,7 @@ onUnmounted(() => {
     <div class="px-4 space-y-2 min-w-72">
       <RouterLink
         to="/visualizer"
+        @click="emit('toggle-sidebar')"
         class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group"
       >
         <Drum class="size-6 p-0.5 stroke-neutral-300 group-hover:stroke-white duration-100"></Drum>
@@ -138,6 +155,7 @@ onUnmounted(() => {
       </RouterLink>
       <RouterLink
         to="/settings"
+        @click="emit('toggle-sidebar')"
         class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group"
       >
         <Gear class="size-6 stroke-1 stroke-neutral-300 group-hover:stroke-white duration-100"></Gear>
