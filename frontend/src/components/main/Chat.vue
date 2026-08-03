@@ -295,7 +295,7 @@ onMounted(async () => {
     <!-- CONTENT -->
     <div class="h-[calc(100svh-230px)] relative w-full">
       <div
-        class="overflow-y-auto h-full w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald overflow-x-hidden"
+        class="overflow-y-auto h-full w-full sm:w-4/5 mx-auto flex flex-col gap-y-10 pr-4 scrollbar-thumb-emerald overflow-x-hidden"
         ref="contentArea"
       >
         <Message
@@ -316,7 +316,7 @@ onMounted(async () => {
 
     <AnimatePresence>
       <motion.div
-        class="p-2 w-[calc(80%-25px)] flex items-center justify-center flex-wrap absolute left-1/2 -translate-x-1/2 gap-2 z-100"
+        class="p-2 w-full sm:w-[calc(80%-25px)] hidden sm:flex items-center justify-center flex-wrap absolute left-1/2 -translate-x-1/2 gap-2 z-100"
         v-if="chat?.getMessages().length === 1 && message.length === 0"
         :initial="{ bottom: 80, opacity: 0 }"
         :animate="{ bottom: 144, opacity: 1 }"
@@ -334,7 +334,7 @@ onMounted(async () => {
 
     <!-- INPUT -->
     <motion.div
-      class="bg-neutral-800 p-2 w-[calc(80%-25px)] rounded-lg flex flex-col items-center absolute left-1/2 -translate-x-1/2 shadow-[0px_0px_40px_3px] shadow-transparent gap-y-2 z-100 border border-transparent transition-shadow duration-500"
+      class="bg-neutral-800 p-2 w-[calc(100%-32px)] sm:w-[calc(80%-25px)] rounded-lg flex flex-col items-center absolute left-1/2 -translate-x-1/2 shadow-[0px_0px_40px_3px] shadow-transparent gap-y-2 z-100 border border-transparent transition-shadow duration-500"
       :class="{ 'shadow-verdant/20': isFocused }"
       :initial="{ bottom: 0, opacity: 0 }"
       :animate="{ bottom: 32, opacity: 1 }"
