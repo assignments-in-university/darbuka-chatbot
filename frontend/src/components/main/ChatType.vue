@@ -47,7 +47,7 @@ const newLearningChat = () => {
           Choose The Chat Type
         </motion.h1>
         <motion.p
-          class="max-w-3/5 text-center mx-auto font-primary text-neutral-300"
+          class="sm:max-w-3/5 text-center mx-auto font-primary text-neutral-300"
           :initial="{ opacity: 0, y: 10 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ delay: 0.1 }"
@@ -56,9 +56,9 @@ const newLearningChat = () => {
         </motion.p>
       </div>
 
-      <div class="flex gap-4 font-primary">
+      <div class="flex flex-col lg:flex-row gap-4 font-primary">
         <motion.div
-          class="w-full bg-neutral-800/80 rounded-md border border-neutral-700 p-10 duration-150 transition-colors group hover:border-emerald"
+          class="w-full bg-neutral-800/80 rounded-md border border-neutral-700 p-4 sm:p-8 lg:p-10 duration-150 transition-colors group hover:border-emerald"
           :initial="{ opacity: 0, x: -20 }"
           :animate="{ opacity: 1, x: 0 }"
           :transition="{ delay: 0.2 }"
@@ -83,7 +83,7 @@ const newLearningChat = () => {
           </button>
         </motion.div>
         <motion.div
-          class="w-full bg-neutral-800/80 rounded-md border border-neutral-700 p-10 duration-150 transition-colors group hover:border-emerald"
+          class="w-full bg-neutral-800/80 rounded-md border border-neutral-700 p-4 sm:p-8 lg:p-10 duration-150 transition-colors group hover:border-emerald"
           :initial="{ opacity: 0, x: 20 }"
           :animate="{ opacity: 1, x: 0 }"
           :transition="{ delay: 0.3 }"
