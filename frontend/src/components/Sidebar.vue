@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Drum from '@/assets/icons/Drum.vue';
 import Gear from '@/assets/icons/Gear.vue';
-import Help from '@/assets/icons/Help.vue';
 import Learn from '@/assets/icons/Learn.vue';
 import MessageIcon from '@/assets/icons/Message.vue';
 import X from '@/assets/icons/X.vue';
@@ -59,7 +58,7 @@ onUnmounted(() => {
 
 <template>
   <motion.nav
-    class="w-72 border-r border-r-[#3F3F46]/30 fixed z-100 h-svh bg-coal text-white flex flex-col overflow-hidden duration-300"
+    class="w-72 border-r border-r-[#3F3F46]/30 fixed z-1000 h-svh bg-coal text-white flex flex-col overflow-hidden duration-300"
     :class="{ '-translate-x-full': !isSidebarOpen && isWindowMd }"
   >
     <!-- TOP -->
@@ -164,7 +163,7 @@ onUnmounted(() => {
   <!-- OVERLAY FOR WHEN SIDEBAR IS OPEN -->
   <AnimatePresence>
     <motion.div
-      class="fixed inset-0 bg-black/30 z-50 backdrop-blur-sm"
+      class="fixed inset-0 bg-black/30 z-500 backdrop-blur-sm"
       v-if="isSidebarOpen && isWindowMd"
       :initial="{ opacity: 0 }"
       :animate="{ opacity: 1 }"
