@@ -227,35 +227,35 @@ const saveGoalsAndGenerateCourse = async () => {
       </div>
 
       <div class="flex flex-col gap-y-3 mb-10">
-        <label class="max-w-max text-xs font-medium font-tertiary uppercase">Time Limit</label>
+        <label class="max-w-max text-xs font-medium font-tertiary uppercase">Time Available to Learn</label>
         <div class="flex flex-col gap-4 font-primary text-sm">
           <label
             class="cursor-pointer flex items-center w-full py-2 rounded-md justify-center border border-transparent duration-100 text-neutral-500 bg-neutral-800"
             :class="{ 'bg-emerald/20! border-emerald! text-white': goalsForm.timeLimit === '10-15 minutes' }"
           >
             <input v-model="goalsForm.timeLimit" type="radio" value="10-15 minutes" class="appearance-none" />
-            <span class="ml-2">10-15 minutes</span>
+            <span class="ml-2">10-15 minutes per day</span>
           </label>
           <label
             class="cursor-pointer flex items-center w-full py-2 rounded-md justify-center border border-transparent duration-100 text-neutral-500 bg-neutral-800"
             :class="{ 'bg-emerald/20! border-emerald! text-white': goalsForm.timeLimit === '20-30 minutes' }"
           >
             <input v-model="goalsForm.timeLimit" type="radio" value="20-30 minutes" class="appearance-none" />
-            <span class="ml-2">20-30 minutes</span>
+            <span class="ml-2">20-30 minutes per day</span>
           </label>
           <label
             class="cursor-pointer flex items-center w-full py-2 rounded-md justify-center border border-transparent duration-100 text-neutral-500 bg-neutral-800"
             :class="{ 'bg-emerald/20! border-emerald! text-white': goalsForm.timeLimit === '30-60 minutes' }"
           >
             <input v-model="goalsForm.timeLimit" type="radio" value="30-60 minutes" class="appearance-none" />
-            <span class="ml-2">30-60 minutes</span>
+            <span class="ml-2">30-60 minutes per day</span>
           </label>
           <label
             class="cursor-pointer flex items-center w-full py-2 rounded-md justify-center border border-transparent duration-100 text-neutral-500 bg-neutral-800"
             :class="{ 'bg-emerald/20! border-emerald! text-white': goalsForm.timeLimit === '60 minutes +' }"
           >
             <input v-model="goalsForm.timeLimit" type="radio" value="60 minutes +" class="appearance-none" />
-            <span class="ml-2">60 minutes +</span>
+            <span class="ml-2">60 minutes + per day</span>
           </label>
         </div>
       </div>
