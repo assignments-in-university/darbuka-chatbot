@@ -77,7 +77,7 @@ const saveGoalsAndGenerateCourse = async () => {
 </script>
 
 <template>
-  <div class="h-full w-3/4 xl:w-1/2 mx-auto flex flex-col gap-y-4">
+  <div class="h-full w-full sm:w-4/5 xl:w-1/2 mx-auto flex flex-col gap-y-4 py-4">
     <div class="space-y-2 text-center" v-if="isSettingsPage">
       <motion.h1
         class="text-4xl font-primary text-emerald font-semibold"
@@ -107,6 +107,29 @@ const saveGoalsAndGenerateCourse = async () => {
         :transition="{ delay: 0.1 }"
         >Generate a course based on your preferences and goals.</motion.p
       >
+    </div>
+
+    <div class="p-2 flex gap-x-4 font-primary text-center">
+      <motion.div
+        class="cursor-pointer w-full px-4 py-1.5 rounded-md border-neutral-700 border bg-neutral-800 hover:bg-emerald/20 hover:text-emerald hover:border-emerald duration-100 transition-colors flex items-center justify-center"
+        :class="{ 'text-emerald! border-emerald! bg-emerald/20!': isSettingsPage }"
+        @click="isSettingsPage = true"
+        :initial="{ opacity: 0, x: -10 }"
+        :animate="{ opacity: 1, x: 0 }"
+        :transition="{ delay: 0.3 }"
+      >
+        Personal Settings
+      </motion.div>
+      <motion.div
+        class="cursor-pointer w-full px-4 py-1.5 rounded-md border-neutral-700 border bg-neutral-800 hover:bg-emerald/20 hover:text-emerald hover:border-emerald duration-100 transition-colors flex items-center justify-center"
+        :class="{ 'text-emerald! border-emerald! bg-emerald/20!': !isSettingsPage }"
+        @click="isSettingsPage = false"
+        :initial="{ opacity: 0, x: 10 }"
+        :animate="{ opacity: 1, x: 0 }"
+        :transition="{ delay: 0.3 }"
+      >
+        Course Generation
+      </motion.div>
     </div>
 
     <motion.form
@@ -152,8 +175,8 @@ const saveGoalsAndGenerateCourse = async () => {
 
       <!-- Skill Level Field -->
       <div class="flex flex-col gap-y-3 mb-10">
-        <label class="max-w-max text-xs font-medium font-tertiary uppercase">Skill Level</label>
-        <div class="flex gap-x-4 font-primary text-sm">
+        <label class="max-w-max text-xs font-medium font-tertiary uppercase">Your Darbuka Knowledge Level</label>
+        <div class="flex flex-wrap sm:flex-nowrap gap-4 font-primary text-sm">
           <label
             class="cursor-pointer flex items-center w-full py-2 rounded-md justify-center border border-transparent duration-100 text-neutral-500 bg-neutral-800"
             :class="{ 'bg-emerald/20! border-emerald! text-white': settingsForm.skillLevel === 'beginner' }"
@@ -189,7 +212,7 @@ const saveGoalsAndGenerateCourse = async () => {
       :initial="{ opacity: 0, x: -10 }"
       :animate="{ opacity: 1, x: 0 }"
       :transition="{ delay: 0.2 }"
-      class="space-y-6 p-4 bg-neutral-900 rounded-md border border-neutral-700 overflow-y-auto max-h-88.25 scrollbar-thumb-emerald"
+      class="space-y-6 p-4 bg-neutral-900 rounded-md border border-neutral-700"
       v-else
     >
       <div class="flex flex-col gap-y-3 mb-10">
@@ -270,29 +293,6 @@ const saveGoalsAndGenerateCourse = async () => {
         <spinner class="stroke-black animate-spin" v-if="isLoading"></spinner>
       </button>
     </motion.form>
-
-    <div class="p-2 flex gap-x-4 font-primary text-center">
-      <motion.div
-        class="cursor-pointer w-full px-4 py-1.5 rounded-md border-neutral-700 border bg-neutral-800 hover:bg-emerald/20 hover:text-emerald hover:border-emerald duration-100 transition-colors"
-        :class="{ 'text-emerald! border-emerald! bg-emerald/20!': isSettingsPage }"
-        @click="isSettingsPage = true"
-        :initial="{ opacity: 0, x: -10 }"
-        :animate="{ opacity: 1, x: 0 }"
-        :transition="{ delay: 0.3 }"
-      >
-        Settings
-      </motion.div>
-      <motion.div
-        class="cursor-pointer w-full px-4 py-1.5 rounded-md border-neutral-700 border bg-neutral-800 hover:bg-emerald/20 hover:text-emerald hover:border-emerald duration-100 transition-colors"
-        :class="{ 'text-emerald! border-emerald! bg-emerald/20!': !isSettingsPage }"
-        @click="isSettingsPage = false"
-        :initial="{ opacity: 0, x: 10 }"
-        :animate="{ opacity: 1, x: 0 }"
-        :transition="{ delay: 0.3 }"
-      >
-        Course Generation
-      </motion.div>
-    </div>
 
     <div class="font-primary text-center" v-if="isSettingsPage">
       <motion.h3 class="mt-4 mb-1" :initial="{ opacity: 0, x: -10 }" :animate="{ opacity: 1, x: 0 }" :transition="{ delay: 0.4 }">

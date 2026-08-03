@@ -36,7 +36,7 @@ onMounted(() => {
       <Header @toggle-sidebar="isSidebarOpen = !isSidebarOpen"></Header>
 
       <div
-        class="text-white bg-neutral-950 h-[calc(100vh-64px)] p-4 relative bg-[repeating-radial-gradient(var(--color-neutral-900)_0,var(--color-neutral-900)_1px,transparent_1px,transparent_100%)] bg-size-[20px_20px]"
+        class="text-white bg-neutral-950 min-h-[calc(100vh-64px)] p-4 relative bg-[repeating-radial-gradient(var(--color-neutral-900)_0,var(--color-neutral-900)_1px,transparent_1px,transparent_100%)] bg-size-[20px_20px]"
       >
         <RouterView :chat-list="chatList" :settings="settings" class="h-full"></RouterView>
       </div>
