@@ -14,7 +14,7 @@
 /* #00FF90 */
 
 body {
-  @apply bg-white dark:bg-black;
+  @apply bg-black;
 }
 
 .router-link-active {
