@@ -36,7 +36,9 @@ watch(chatName, (newName) => {
 </script>
 
 <template>
-  <header class="h-16 w-full bg-black text-white flex items-center px-4 border-b border-b-[#3F3F46]/60">
+  <header
+    class="h-16 w-full bg-black text-white flex items-center px-4 border-b border-b-[#3F3F46]/60 fixed top-0 md:left-72 z-100 md:w-[calc(100%-288px)]"
+  >
     <div class="mr-4 block md:hidden">
       <Sidebar class="stroke-emerald stroke-1 cursor-pointer" @click="emit('toggle-sidebar')"></Sidebar>
     </div>
