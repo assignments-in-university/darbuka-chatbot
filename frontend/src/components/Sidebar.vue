@@ -44,7 +44,7 @@ watch(
 );
 
 const handleResize = () => {
-  isWindowMd.value = window.innerWidth < 768;
+  isWindowMd.value = document.documentElement.offsetWidth < 768;
 };
 
 const goToNewChat = () => {
