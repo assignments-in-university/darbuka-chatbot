@@ -4,21 +4,36 @@ import Gear from '@/assets/icons/Gear.vue';
 import Help from '@/assets/icons/Help.vue';
 import Learn from '@/assets/icons/Learn.vue';
 import MessageIcon from '@/assets/icons/Message.vue';
+import X from '@/assets/icons/X.vue';
 import { chatName } from '@/stores/useChatStore';
 import { Chat } from '@/utils/Chat';
 import { ChatList } from '@/utils/ChatList';
 import { Settings } from '@/utils/Settings';
-import { ref, watch } from 'vue';
+import { AnimatePresence, motion } from 'motion-v';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps<{
   chatList: ChatList;
   settings: Settings;
+  isSidebarOpen: boolean;
+}>();
+
+const emit = defineEmits<{
+  'toggle-sidebar': [];
 }>();
 
 const route = useRoute();
 
+const isWindowMd = ref(false);
+
 const chats = ref(props.chatList.getChats().map((id) => new Chat({ id, skipMessagesLoad: true })));
+
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit',
+  month: '2-digit',
+  year: '2-digit',
+});
 
 watch(
   [route, chatName],
@@ -28,28 +43,45 @@ watch(
   { flush: 'post' },
 );
 
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-  day: '2-digit',
-  month: '2-digit',
-  year: '2-digit',
+const handleResize = () => {
+  isWindowMd.value = window.innerWidth < 768;
+};
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  handleResize();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
 });
 </script>
 
 <template>
-  <nav class="w-72 border-r border-r-[#3F3F46]/30 h-svh bg-coal text-white flex flex-col">
+  <motion.nav
+    class="w-72 border-r border-r-[#3F3F46]/30 fixed z-100 h-svh bg-coal text-white flex flex-col overflow-hidden duration-300"
+    :class="{ '-translate-x-full': !isSidebarOpen && isWindowMd }"
+  >
     <!-- TOP -->
-    <div class="h-16 flex items-center px-4 gap-x-4 mb-4">
+    <div class="h-16 flex items-center px-4 gap-x-4 mb-4 min-w-72">
       <div class="aspect-square w-12 rounded-md border-3 border-emerald">
         <img src="../assets/images/logo.jpg" alt="Logo" class="rounded-md" />
       </div>
-      <div>
+      <div class="mr-auto">
         <h1 class="text-lg font-primary uppercase">Sout</h1>
         <h2 class="text-emerald text-sm font-tertiary uppercase">Darbuka Chatbot</h2>
+      </div>
+      <div
+        class="p-1.5 border border-emerald rounded-md flex items-center justify-center hover:bg-emerald/20 duration-100 cursor-pointer"
+        @click="emit('toggle-sidebar')"
+        v-if="isWindowMd"
+      >
+        <X class="stroke-emerald size-4"></X>
       </div>
     </div>
 
     <!-- NEW CHAT -->
-    <div class="px-4 mb-2">
+    <div class="px-4 mb-2 min-w-72">
       <div
         class="px-2 py-1.5 bg-verdant text-black rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
         @click="$router.push('/chat/new')"
@@ -60,7 +92,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     </div>
 
     <!-- COURSE -->
-    <div class="px-4">
+    <div class="px-4 min-w-72">
       <div
         class="px-2 py-1.5 border border-verdant hover:bg-verdant/20 text-verdant rounded-md flex items-center gap-x-1 duration-150 cursor-pointer"
         :class="{ 'bg-verdant/20': $route.fullPath === '/course' }"
@@ -72,8 +104,8 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     </div>
 
     <!-- ALL CHATS -->
-    <h2 class="px-4 font-tertiary text-sm mt-6 mb-2">All Chats</h2>
-    <div class="h-90 relative mb-auto">
+    <h2 class="px-4 font-tertiary text-sm mt-6 mb-2 min-w-72">All Chats</h2>
+    <div class="h-90 relative mb-auto min-w-72">
       <div class="px-4 flex flex-col gap-y-2.5 max-h-84 overflow-y-auto scrollbar-thumb-emerald!">
         <div
           class="text-sm px-2 py-1.5 bg-neutral-900 rounded-md duration-100 cursor-pointer group last:mb-6 border border-transparent hover:border-emerald flex items-center"
@@ -97,7 +129,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     </div>
 
     <!-- VISUALIZER AND SETTINGS -->
-    <div class="px-4 space-y-2">
+    <div class="px-4 space-y-2 min-w-72">
       <RouterLink
         to="/visualizer"
         class="px-2 py-2 hover:bg-neutral-900 rounded-md flex items-center gap-x-2 duration-100 cursor-pointer group"
@@ -115,7 +147,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     </div>
 
     <!-- PROFILE -->
-    <div class="p-4">
+    <div class="p-4 min-w-72">
       <hr class="border-t border-[#3F3F46]/50 mb-3" />
       <div class="flex gap-x-4 items-center">
         <div class="size-10 rounded-full border-verdant border-2">
@@ -127,5 +159,16 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
         </div>
       </div>
     </div>
-  </nav>
+  </motion.nav>
+
+  <!-- OVERLAY FOR WHEN SIDEBAR IS OPEN -->
+  <AnimatePresence>
+    <motion.div
+      class="fixed inset-0 bg-black/30 z-50 backdrop-blur-sm"
+      v-if="isSidebarOpen && isWindowMd"
+      :initial="{ opacity: 0 }"
+      :animate="{ opacity: 1 }"
+      :exit="{ opacity: 0 }"
+    ></motion.div>
+  </AnimatePresence>
 </template>
