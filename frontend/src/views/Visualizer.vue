@@ -168,7 +168,7 @@ onMounted(() => {
 
   controls.minDistance = 4;
 
-  controls.maxDistance = 5;
+  controls.maxDistance = 6;
 
   controls.addEventListener('start', updateCameraView);
 
@@ -186,6 +186,9 @@ function animate() {
 }
 
 function onResize() {
+  const isWindowOverThreshold = document.documentElement.clientWidth < 768;
+  camera.position.setZ(isWindowOverThreshold ? -6 : -5);
+
   camera.aspect = window.innerWidth / window.innerHeight;
 
   camera.updateProjectionMatrix();
@@ -237,7 +240,7 @@ onUnmounted(() => {
     <!-- DRUM HEAD -->
     <!-- --------- -->
     <AnimatePresence>
-      <div v-if="currentView === 0">
+      <div v-if="currentView === 0" class="hidden md:block">
         <!-- LABEL -->
         <div class="absolute left-11/20 top-3/20 w-3/20">
           <svg viewBox="0 0 148 45" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -277,7 +280,7 @@ onUnmounted(() => {
             :transition="{ delay: 0.1 }"
             >The Drum Head</motion.h2
           >
-          <div class="space-y-2 text-neutral-300 w-80">
+          <div class="space-y-2 text-neutral-300 w-60 lg:w-80">
             <motion.p
               :initial="{ opacity: 0, y: 10 }"
               :animate="{ opacity: 1, y: 0 }"
@@ -303,7 +306,7 @@ onUnmounted(() => {
     <!-- DRUM BODY -->
     <!-- --------- -->
     <AnimatePresence>
-      <div v-if="currentView === 1">
+      <div v-if="currentView === 1" class="hidden md:block">
         <!-- LABEL -->
         <div class="absolute left-6/20 top-6/20 w-3/20 -scale-x-100">
           <svg viewBox="0 0 148 45" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -343,7 +346,7 @@ onUnmounted(() => {
             :transition="{ delay: 0.1 }"
             >The Darbuka Body</motion.h2
           >
-          <div class="space-y-2 text-neutral-300 w-80">
+          <div class="space-y-2 text-neutral-300 w-60 lg:w-80">
             <motion.p
               :initial="{ opacity: 0, y: 10 }"
               :animate="{ opacity: 1, y: 0 }"
@@ -401,7 +404,7 @@ onUnmounted(() => {
             :transition="{ delay: 0.1 }"
             >The Darbuka Neck</motion.h2
           >
-          <div class="space-y-2 text-neutral-300 w-80">
+          <div class="space-y-2 text-neutral-300 w-60 lg:w-80">
             <motion.p
               :initial="{ opacity: 0, y: 10 }"
               :animate="{ opacity: 1, y: 0 }"
@@ -427,7 +430,7 @@ onUnmounted(() => {
     <!-- DRUM BASE -->
     <!-- --------- -->
     <AnimatePresence>
-      <div v-if="currentView === 2">
+      <div v-if="currentView === 2" class="hidden md:block">
         <!-- LABEL -->
         <div class="absolute left-11/20 top-13/20 w-3/20 -scale-y-100">
           <svg viewBox="0 0 148 45" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -467,7 +470,7 @@ onUnmounted(() => {
             :transition="{ delay: 0.1 }"
             >The Drum Base</motion.h2
           >
-          <div class="space-y-2 text-neutral-300 w-80">
+          <div class="space-y-2 text-neutral-300 w-60 lg:w-80">
             <motion.p
               :initial="{ opacity: 0, y: 10 }"
               :animate="{ opacity: 1, y: 0 }"
@@ -499,7 +502,7 @@ onUnmounted(() => {
       <Mute class="size-5 stroke-emerald" v-else></Mute>
     </div>
 
-    <div class="absolute bottom-5 right-5 z-20 flex items-center gap-2">
+    <div class="absolute bottom-5 right-5 z-20 hidden md:flex items-center gap-2">
       <p class="text-white w-40">Use the arrow keys to navigate views.</p>
       <div
         class="bg-emerald/20 text-white border border-emerald rounded-md size-10 flex items-center justify-center aspect-square animate-pulse cursor-pointer"
