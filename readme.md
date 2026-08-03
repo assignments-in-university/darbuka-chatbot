@@ -1,6 +1,6 @@
 # Sout Chatbot
 
-<img src="./frontend/src/assets/images/logo.jpg" width="180" style="float: right; padding-left: 20px;">
+<img src="./frontend/src/assets/images/logo.jpg" width="160" align="right">
 
 ### Introduction
 
