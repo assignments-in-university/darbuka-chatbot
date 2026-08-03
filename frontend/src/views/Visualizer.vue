@@ -46,6 +46,60 @@ const views: CameraView[] = [
 
 const currentView = ref(-1);
 
+function goToView(index: number) {
+  const view = views[index]!;
+
+  animateCamera(view.position, view.target);
+
+  controls.target.copy(view.target);
+
+  controls.update();
+}
+
+function nextView() {
+  currentView.value++;
+
+  if (currentView.value >= views.length) currentView.value = 0;
+
+  goToView(currentView.value);
+}
+
+function previousView() {
+  currentView.value--;
+
+  if (currentView.value < 0) currentView.value = views.length - 1;
+
+  goToView(currentView.value);
+}
+
+function animateCamera(destination: THREE.Vector3, target: THREE.Vector3) {
+  const start = camera.position.clone();
+  const startTarget = controls.target.clone();
+
+  let progress = 0;
+
+  function easeInOut(t: number) {
+    return t * t * (3 - 2 * t);
+  }
+
+  function move() {
+    progress = Math.min(progress + 0.03, 1);
+
+    const eased = easeInOut(progress);
+
+    camera.position.lerpVectors(start, destination, eased);
+    controls.target.lerpVectors(startTarget, target, eased);
+
+    controls.update();
+
+    if (progress < 1) {
+      requestAnimationFrame(move);
+    }
+  }
+
+  move();
+}
+
 onMounted(() => {
   scene = new THREE.Scene();
 
@@ -102,62 +156,6 @@ onMounted(() => {
     if (event.key === 'ArrowLeft') {
       previousView();
     }
-  }
-
-  function goToView(index: number) {
-    const view = views[index]!;
-
-    animateCamera(view.position, view.target);
-
-    controls.target.copy(view.target);
-
-    controls.update();
-  }
-
-  function nextView() {
-    currentView.value++;
-
-    if (currentView.value >= views.length) currentView.value = 0;
-
-    goToView(currentView.value);
-  }
-
-  function previousView() {
-    currentView.value--;
-
-    if (currentView.value < 0) currentView.value = views.length - 1;
-
-    goToView(currentView.value);
-  }
-
-  let cameraAnimation = false;
-
-  function animateCamera(destination: THREE.Vector3, target: THREE.Vector3) {
-    const start = camera.position.clone();
-    const startTarget = controls.target.clone();
-
-    let progress = 0;
-
-    function easeInOut(t: number) {
-      return t * t * (3 - 2 * t);
-    }
-
-    function move() {
-      progress = Math.min(progress + 0.03, 1);
-
-      const eased = easeInOut(progress);
-
-      camera.position.lerpVectors(start, destination, eased);
-      controls.target.lerpVectors(startTarget, target, eased);
-
-      controls.update();
-
-      if (progress < 1) {
-        requestAnimationFrame(move);
-      }
-    }
-
-    move();
   }
 
   controls = new OrbitControls(camera, renderer.domElement);
@@ -504,12 +502,14 @@ onUnmounted(() => {
     <div class="absolute bottom-5 right-5 z-20 flex items-center gap-2">
       <p class="text-white w-40">Use the arrow keys to navigate views.</p>
       <div
-        class="bg-emerald/20 text-white border border-emerald rounded-md size-10 flex items-center justify-center aspect-square animate-pulse"
+        class="bg-emerald/20 text-white border border-emerald rounded-md size-10 flex items-center justify-center aspect-square animate-pulse cursor-pointer"
+        @click="nextView"
       >
         <UpArrow class="size-5 stroke-white -rotate-90"></UpArrow>
       </div>
       <div
-        class="bg-emerald/20 text-white border border-emerald rounded-md size-10 flex items-center justify-center aspect-square animate-pulse"
+        class="bg-emerald/20 text-white border border-emerald rounded-md size-10 flex items-center justify-center aspect-square animate-pulse cursor-pointer"
+        @click="previousView"
       >
         <UpArrow class="size-5 stroke-white rotate-90"></UpArrow>
       </div>
