@@ -5,10 +5,13 @@ import Tick from '@/assets/icons/Tick.vue';
 import { Settings } from '@/utils/Settings';
 import { motion } from 'motion-v';
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   settings: Settings;
 }>();
+
+const router = useRouter();
 
 const isLoading = ref(false);
 
@@ -18,6 +21,7 @@ const totalCourseDuration = computed(() => course.value?.lessons.reduce((acc, va
 
 const updateCurrentLesson = (currentLessonId: number) => {
   props.settings.updateDetails({ currentLessonId });
+  router.push('/chat?isLearningMode=true');
 };
 
 const generateCourse = async () => {
