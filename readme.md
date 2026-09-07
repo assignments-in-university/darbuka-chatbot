@@ -4,7 +4,7 @@
 
 ### Introduction
 
-A cute little chatbot app for the Darbuka drum! Features a chatbot, custom learning course generation, and a 3d visualizer with audio. Made with love for a university project :)
+A cute little chatbot app for the Darbuka drum! Features a chatbot, custom learning course generation, and a 3d visualizer with audio.
 
 NOTE: The project uses the free tier Gemini model, so please be vary about the number of messages you send- Thank you!
 
