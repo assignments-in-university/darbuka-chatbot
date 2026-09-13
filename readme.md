@@ -4,7 +4,9 @@
 
 ### Introduction
 
-A cute little chatbot app for the Darbuka drum! Features a chatbot, custom learning course generation, and a 3d visualizer with audio.
+A cute little chatbot app for the Darbuka drum! Features a chatbot, custom learning course generation, and a 3d visualizer with audio. Made with love! :)
+
+**See "[Regarding School Projects](#regarding-school-projects)"!**
 
 NOTE: The project uses the free tier Gemini model, so please be vary about the number of messages you send- Thank you!
 
@@ -44,3 +46,8 @@ Learning chats are a little more complicated: the chatbot's goal is to teach you
 ### Chatbot Features
 
 The chatbot has memory context, meaning it remembers a few of the previous messages. It also has access to your settings, so that it can provide more personalized responses to you.
+
+### Regarding School Projects
+I submitted a rudimentary version of this to my school, with a simpler design and a single chat page. 
+
+The multiple chat modes, the session saving, the 3D drum visualizer, the revamped UI, the chat session saving and the course generation were all made specifically for Hackclub Horizons! This project's primary purpose was to be submitted to the Horizons event, not for school or uni, and the differences between this version and the version I used for my academics are so great that they are basically different projects. 
